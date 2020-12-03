@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file original="" product-name="Flownative.Canto" source-language="en" datatype="plaintext">
+        <body>
+            <trans-unit id="moduleDescription" xml:space="preserve">
+                <source>This module allows you to connect with Canto, a cloud-based media asset management service, in order to use remote assets as if they were stored locally in your Neos site.</source>
+            </trans-unit>
+            <trans-unit id="cantoConnectionSettings" xml:space="preserve">
+                <source>Canto Connection Settings</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

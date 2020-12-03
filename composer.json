@@ -1,0 +1,23 @@
+{
+    "description": "Neos integration for Canto",
+    "type": "neos-package",
+    "name": "flownative/neos-canto",
+    "license": "MIT",
+    "require": {
+        "neos/flow": "6.* || dev-master",
+        "neos/media": "5.* || 6.* || dev-master",
+        "guzzlehttp/guzzle": "6.*",
+        "behat/transliterator": "~1.0",
+        "flownative/oauth2-client": "^2.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Flownative\\Canto\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Flownative.Canto"
+        }
+    }
+}

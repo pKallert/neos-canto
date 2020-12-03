@@ -1,0 +1,50 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<div class="neos-content neos-container-fluid">
+    <h2>{neos:backend.translate(id: 'cantoConnectionSettings', source: 'Main', package: 'Flownative.Canto')}</h2>
+    <br/>
+    <f:form action="updateRefreshToken" method="post">
+        <div class="neos-row-fluid">
+            <div class="neos-span6">
+                <fieldset>
+                    <div class="neos-control-group">
+                        <label class="neos-control-label" for="apiBaseUri">API Base URI</label>
+                        <div class="neos-controls">
+                            <f:form.textfield class="neos-span12" id="apiBaseUri" readonly="true" value="{apiBaseUri}"/>
+                        </div>
+                    </div>
+                    <f:if condition="{connectionSucceeded}">
+                        <div class="neos-control-group">
+                            <div class="neos-controls">
+                                <table class="neos-table">
+                                    <tr>
+                                        <td>{user.firstName} {user.lastName}</td>
+                                        <td>{user.email}</td>
+                                </table>
+                            </div>
+                        </div>
+                    </f:if>
+                </fieldset>
+                <f:if condition="{authenticationError}">
+                    <p><i class="fa fa-exclamation-triangle"></i> {authenticationError}</p>
+                </f:if>
+            </div>
+        </div>
+        <div class="neos-row-fluid">
+            <div class="neos-span6">
+                <ul>
+                    <f:for as="result" each="{tree.results}">
+                        <li>
+                            <i class="fa fa-folder"></i> {result.id}  {result.name}
+                            <f:for each="{result.children}" as="child">
+                                <li style="margin-left: 20px;">
+                                    <i class="fa fa-folder"></i> {child.id}  {child.name}
+                                </li>
+                            </f:for>
+                        </li>
+                    </f:for>
+                </ul>
+            </div>
+        </div>
+    </f:form>
+
+</div>

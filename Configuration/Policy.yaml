@@ -1,0 +1,19 @@
+#
+# Security policy for the Flownative Canto package
+#
+
+privilegeTargets:
+
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+
+
+    'Flownative.Canto:ManageConnection':
+      matcher: 'method(Flownative\Canto\Controller\CantoController->(index|updateRefreshToken)Action())'
+
+roles:
+
+  'Neos.Neos:Administrator':
+    privileges:
+      -
+        privilegeTarget: 'Flownative.Canto:ManageConnection'
+        permission: GRANT

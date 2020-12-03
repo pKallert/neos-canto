@@ -1,0 +1,29 @@
+Neos:
+  Flow:
+    mvc:
+      routes:
+        'Flownative.Canto':
+          position: 'after Neos.Neos'
+
+  Media:
+    assetSources:
+      'flownative-canto':
+        assetSource: 'Flownative\Canto\AssetSource\CantoAssetSource'
+        assetSourceOptions:
+          iconPath: 'resource://Flownative.Canto/Public/Icons/Canto-Logo-White.svg'
+          description: 'Assets in Canto Digital Asset Management'
+          appId: '%env:FLOWNATIVE_CANTO_OAUTH_APP_ID%'
+          appSecret: '%env:FLOWNATIVE_CANTO_OAUTH_APP_SECRET%'
+          apiBaseUri: '%env:FLOWNATIVE_CANTO_API_BASE_URI%'
+          oAuthBaseUri: '%env:FLOWNATIVE_CANTO_OAUTH_BASE_URI%'
+
+  Neos:
+    modules:
+      management:
+        submodules:
+          canto:
+            controller: \Flownative\Canto\Controller\CantoController
+            label: 'Canto'
+            description: 'Flownative.Canto:Main:moduleDescription'
+            icon: 'icon-photo'
+            privilegeTarget: 'Flownative.Canto:ManageConnection'
