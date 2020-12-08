@@ -11,12 +11,10 @@ namespace Flownative\Canto\AssetSource;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
 use Exception;
-use Flownative\Canto\Exception\AccessToAssetDeniedException;
 use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Flownative\Canto\Exception\ConnectionException;
-use Flownative\Canto\Exception\MissingClientSecretException;
 use Neos\Cache\Frontend\StringFrontend;
 use Neos\Cache\Frontend\VariableFrontend;
 use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;

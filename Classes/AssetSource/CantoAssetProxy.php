@@ -18,6 +18,7 @@ use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\HasRemoteOriginalInterface;
+use Neos\Media\Domain\Model\AssetSource\AssetProxy\ProvidesOriginalUriInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
 use Neos\Media\Domain\Model\ImportedAsset;
 use Neos\Media\Domain\Repository\ImportedAssetRepository;
@@ -28,7 +29,7 @@ use stdClass;
 /**
  *
  */
-final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface
+final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface, ProvidesOriginalUriInterface
 {
     /**
      * @var CantoAssetSource
@@ -118,7 +119,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $assetProxy->assetSource = $assetSource;
         $assetProxy->identifier = $jsonObject->scheme . '|' . $jsonObject->id;
         $assetProxy->label = $jsonObject->name;
-        $assetProxy->filename = Transliterator::urlize($jsonObject->name);
+        $assetProxy->filename = $jsonObject->name;
         $assetProxy->lastModified = \DateTimeImmutable::createFromFormat('U', $jsonObject->time);
         $assetProxy->fileSize = $jsonObject->size;
         $assetProxy->mediaType = MediaTypes::getMediaTypeFromFilename($jsonObject->name);
@@ -130,8 +131,6 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $assetProxy->thumbnailUri = new Uri($jsonObject->url->directUrlPreview);
         $assetProxy->previewUri = new Uri($jsonObject->url->directUrlPreview);
         $assetProxy->originalUri = new Uri($jsonObject->url->directUrlOriginal);
-
-#        \Neos\Flow\var_dump($assetProxy->getMediaType());
 
         return $assetProxy;
     }
@@ -256,6 +255,14 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     public function getImportStream()
     {
         return fopen($this->assetSource->getCantoClient()->directUri($this->identifier), 'rb');
+    }
+
+    /**
+     * @return UriInterface
+     */
+    public function getOriginalUri(): UriInterface
+    {
+        return $this->assetSource->getCantoClient()->directUri($this->identifier);
     }
 
     /**
