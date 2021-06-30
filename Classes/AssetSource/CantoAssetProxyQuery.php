@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Flownative\Canto\AssetSource;
 
@@ -111,7 +112,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @param string $searchTerm
      */
-    public function setSearchTerm(string $searchTerm)
+    public function setSearchTerm(string $searchTerm): void
     {
         $this->searchTerm = $searchTerm;
     }
@@ -127,7 +128,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @param string $assetTypeFilter
      */
-    public function setAssetTypeFilter(string $assetTypeFilter)
+    public function setAssetTypeFilter(string $assetTypeFilter): void
     {
         $this->assetTypeFilter = $assetTypeFilter;
     }
