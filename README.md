@@ -1,7 +1,7 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 [![Packagist](https://img.shields.io/packagist/v/flownative/neos-canto.svg)](https://packagist.org/packages/flownative/neos-canto)
 
-# Canto adaptor for Neos 5.x
+# Canto adaptor for Neos
 
 This [Flow](https://flow.neos.io) package allows you to use assets (ie.
 pictures and other documents) stored in [Canto](https://www.canto.com/)
