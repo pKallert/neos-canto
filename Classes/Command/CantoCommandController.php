@@ -7,7 +7,6 @@ use Flownative\Canto\AssetSource\CantoAssetProxyRepository;
 use Flownative\Canto\AssetSource\CantoAssetSource;
 use Flownative\Canto\Exception\AccessToAssetDeniedException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Flownative\Canto\Exception\Exception;
 use Flownative\Canto\Exception\MissingClientSecretException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;

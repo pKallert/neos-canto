@@ -13,19 +13,15 @@ namespace Flownative\Canto\Service;
  * source code.
  */
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Flownative\Canto\Exception\ConnectionException;
-use Flownative\Canto\Exception\Exception;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -76,7 +72,7 @@ final class CantoClient
     private $imageOptions;
 
     /**
-     * @var ClientInterface
+     * @var Client
      */
     private $httpClient;
 

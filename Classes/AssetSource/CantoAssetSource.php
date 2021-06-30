@@ -15,8 +15,6 @@ namespace Flownative\Canto\AssetSource;
 
 use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\Canto\Service\CantoClient;
-use Flownative\Canto\Service\CantoServiceFactory;
-use Flownative\OAuth2\Client\Authorization;
 use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations as Flow;

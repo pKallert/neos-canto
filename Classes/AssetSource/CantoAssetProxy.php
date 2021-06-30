@@ -13,7 +13,6 @@ namespace Flownative\Canto\AssetSource;
  * source code.
  */
 
-use Behat\Transliterator\Transliterator;
 use Exception;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
