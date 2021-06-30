@@ -12,6 +12,7 @@ namespace Flownative\Canto\Exception;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
 class ConnectionException extends Exception
 {
 }

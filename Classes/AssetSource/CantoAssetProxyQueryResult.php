@@ -12,6 +12,7 @@ namespace Flownative\Canto\AssetSource;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
@@ -102,10 +103,9 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
     {
         $this->initialize();
         return $this->assetProxiesIterator->key();
-
     }
 
-    public function valid()
+    public function valid(): bool
     {
         $this->initialize();
         return $this->assetProxiesIterator->valid();
@@ -117,7 +117,7 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
         $this->assetProxiesIterator->rewind();
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         $this->initialize();
         return $this->assetProxiesIterator->offsetExists($offset);
@@ -146,10 +146,12 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
     {
         if ($this->numberOfAssetProxies === null) {
             if (is_array($this->assetProxies)) {
-                return count($this->assetProxies);
+                $this->numberOfAssetProxies = count($this->assetProxies);
             } else {
-                return $this->query->count();
+                $this->numberOfAssetProxies = $this->query->count();
             }
         }
+
+        return $this->numberOfAssetProxies;
     }
 }

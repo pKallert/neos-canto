@@ -82,11 +82,6 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     private $previewUri;
 
     /**
-     * @var UriInterface
-     */
-    private $originalUri;
-
-    /**
      * @var int
      */
     private $widthInPixels;
@@ -115,22 +110,24 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
      */
     public static function fromJsonObject(stdClass $jsonObject, CantoAssetSource $assetSource): CantoAssetProxy
     {
+        // static used here despite this being a final class because Flow still builds a proxy and self causes
+        // an error because the returned Flownative\Canto\AssetSource\CantoAssetProxy_Original is not the
+        // declared Flownative\Canto\AssetSource\CantoAssetProxy
         $assetProxy = new static();
         $assetProxy->assetSource = $assetSource;
         $assetProxy->identifier = $jsonObject->scheme . '|' . $jsonObject->id;
         $assetProxy->label = $jsonObject->name;
         $assetProxy->filename = $jsonObject->name;
         $assetProxy->lastModified = \DateTimeImmutable::createFromFormat('U', $jsonObject->time);
-        $assetProxy->fileSize = $jsonObject->size;
+        $assetProxy->fileSize = (int)$jsonObject->size;
         $assetProxy->mediaType = MediaTypes::getMediaTypeFromFilename($jsonObject->name);
         $assetProxy->tags = $jsonObject->tag ?? [];
 
-        $assetProxy->widthInPixels = $jsonObject->width ?? null;
-        $assetProxy->heightInPixels = $jsonObject->height ?? null;
+        $assetProxy->widthInPixels = $jsonObject->width ? (int)$jsonObject->width : null;
+        $assetProxy->heightInPixels = $jsonObject->height ? (int)$jsonObject->height : null;
 
         $assetProxy->thumbnailUri = new Uri($jsonObject->url->directUrlPreview);
         $assetProxy->previewUri = new Uri($jsonObject->url->directUrlPreview);
-        $assetProxy->originalUri = new Uri($jsonObject->url->directUrlOriginal);
 
         return $assetProxy;
     }
@@ -254,7 +251,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
      */
     public function getImportStream()
     {
-        return fopen($this->assetSource->getCantoClient()->directUri($this->identifier), 'rb');
+        return fopen((string)$this->assetSource->getCantoClient()->directUri($this->identifier), 'rb');
     }
 
     /**

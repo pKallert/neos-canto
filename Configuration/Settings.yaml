@@ -22,7 +22,7 @@ Neos:
       management:
         submodules:
           canto:
-            controller: \Flownative\Canto\Controller\CantoController
+            controller: 'Flownative\Canto\Controller\CantoController'
             label: 'Canto'
             description: 'Flownative.Canto:Main:moduleDescription'
             icon: 'icon-photo'

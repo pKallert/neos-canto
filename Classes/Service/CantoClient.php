@@ -12,6 +12,7 @@ namespace Flownative\Canto\Service;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
 use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
@@ -25,17 +26,11 @@ use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-
 /**
  * Canto API client
  */
 final class CantoClient
 {
-    /**
-     * @var Client
-     */
-    private $guzzleClient;
-
     /**
      * @var string
      */
@@ -62,28 +57,9 @@ final class CantoClient
     private $authorization;
 
     /**
-     * @var CantoOAuthClient
-     */
-    private $oAuthClient;
-
-    /**
-     * @var array
-     */
-    private $imageOptions;
-
-    /**
      * @var Client
      */
     private $httpClient;
-
-    /**
-     * @var array
-     */
-    private $fields = [
-        'id', 'originalFilename', 'fileType', 'keywords', 'createDate', 'imageHeight', 'imageWidth', 'originalPath', 'subject', 'description',
-        'modifyDate', 'fileSize', 'modifiedImagePaths', 'imagePath', 'dynamicMetadata'
-    ];
-
 
     /**
      * @param string $apiBaseUri
@@ -97,24 +73,6 @@ final class CantoClient
         $this->oAuthBaseUri = $oauthBaseUri;
         $this->appId = $appId;
         $this->appSecret = $appSecret;
-
-        $this->guzzleClient = new Client();
-        $this->imageOptions  = [
-            (object)[
-                'width' => 400,
-                'height' => 400,
-                'quality' => 90
-            ],
-            (object)[
-                'width' => 1500,
-                'height' => 1500,
-                'quality' => 90
-            ],
-            (object)[
-                'sizeMax' => 1920,
-                'quality' => 90
-            ]
-        ];
     }
 
     /**
@@ -123,15 +81,15 @@ final class CantoClient
      */
     public function authenticate(): void
     {
-        $this->oAuthClient = new CantoOAuthClient('canto');
-        $this->oAuthClient->setBaseUri($this->oAuthBaseUri);
+        $oAuthClient = new CantoOAuthClient('canto');
+        $oAuthClient->setBaseUri($this->oAuthBaseUri);
 
         $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant('canto', $this->appId, $this->appSecret, 'admin');
-        $this->authorization = $this->oAuthClient->getAuthorization($authorizationId);
+        $this->authorization = $oAuthClient->getAuthorization($authorizationId);
 
         if ($this->authorization === null) {
-            $this->oAuthClient->requestAccessToken('canto', $this->appId, $this->appSecret, 'admin');
-            $this->authorization = $this->oAuthClient->getAuthorization($authorizationId);
+            $oAuthClient->requestAccessToken('canto', $this->appId, $this->appSecret, 'admin');
+            $this->authorization = $oAuthClient->getAuthorization($authorizationId);
         }
 
         if ($this->authorization === null) {
@@ -162,6 +120,8 @@ final class CantoClient
      */
     public function updateFile(string $id, array $metadata): ResponseInterface
     {
+        // TODO: Implement updateFile() method.
+        throw new \RuntimeException('not implemented');
     }
 
     /**
@@ -174,12 +134,12 @@ final class CantoClient
      * @return ResponseInterface
      * @throws OAuthClientException
      */
-    public function search(string $keyword, array $formatTypes, array $fileTypes, int $offset = 0, int $limit = 50, $orderings = []): ResponseInterface
+    public function search(string $keyword, array $formatTypes, array $fileTypes, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
 
-        $pathAndQuery .= '&limit=' . urlencode($limit);
-        $pathAndQuery .= '&start=' . urlencode($offset);
+        $pathAndQuery .= '&limit=' . urlencode((string)$limit);
+        $pathAndQuery .= '&start=' . urlencode((string)$offset);
 
         if ($formatTypes !== []) {
             $pathAndQuery .= '&scheme=' . urlencode(implode('|', $formatTypes));
@@ -270,7 +230,6 @@ final class CantoClient
     {
         return $this->authorization->getAccessToken();
     }
-
 
     /**
      * Returns a prepared request to an OAuth 2.0 service provider using Bearer token authentication

@@ -16,7 +16,6 @@ namespace Flownative\Canto\Service;
 use Flownative\OAuth2\Client\OAuthClient;
 use League\OAuth2\Client\Provider\GenericProvider;
 
-
 /**
  * Canto OAuth Client
  */
@@ -79,6 +78,7 @@ class CantoOAuthClient extends OAuthClient
     public function getClientId(): string
     {
         // TODO: Implement getClientId() method.
+        throw new \RuntimeException('not implemented');
     }
 
     /**

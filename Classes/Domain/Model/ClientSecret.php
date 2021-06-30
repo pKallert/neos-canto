@@ -12,6 +12,7 @@ namespace Flownative\Canto\Domain\Model;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
 use Doctrine\ORM\Mapping as ORM;
 use Neos\Flow\Annotations\Entity;
 use Neos\Flow\Annotations\Identity;
@@ -82,7 +83,7 @@ class ClientSecret
     /**
      * @param string|null $accessToken
      */
-    public function setAccessToken($accessToken): void
+    public function setAccessToken(?string $accessToken): void
     {
         $this->accessToken = $accessToken;
     }

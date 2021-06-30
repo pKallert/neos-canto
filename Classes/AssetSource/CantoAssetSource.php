@@ -26,6 +26,16 @@ use Neos\Utility\MediaTypes;
 class CantoAssetSource implements AssetSourceInterface
 {
     /**
+     * @var bool
+     */
+    private $autoTaggingEnabled = false;
+
+    /**
+     * @var string
+     */
+    private $autoTaggingInUseTag = 'used-by-neos';
+
+    /**
      * @var string
      */
     private $assetSourceIdentifier;
@@ -195,7 +205,7 @@ class CantoAssetSource implements AssetSourceInterface
      */
     public function isAutoTaggingEnabled(): bool
     {
-        return $this->autoTaggingEnable;
+        return $this->autoTaggingEnabled;
     }
 
     /**

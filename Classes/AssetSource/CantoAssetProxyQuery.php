@@ -92,7 +92,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         return $this->offset;
     }
 
-
     /**
      * @param int $limit
      */

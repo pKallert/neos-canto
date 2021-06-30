@@ -12,6 +12,7 @@ namespace Flownative\Canto\Domain\Repository;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
 use Flownative\Canto\Domain\Model\ClientSecret;
 use Neos\Flow\Annotations\Scope;
 use Neos\Flow\Persistence\Repository;
