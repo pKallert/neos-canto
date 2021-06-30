@@ -79,7 +79,7 @@ final class CantoClient
      * @throws AuthenticationFailedException
      * @throws IdentityProviderException
      */
-    public function authenticate(): void
+    private function authenticate(): void
     {
         $oAuthClient = new CantoOAuthClient('canto');
         $oAuthClient->setBaseUri($this->oAuthBaseUri);
@@ -106,7 +106,6 @@ final class CantoClient
     {
         [$scheme, $id] = explode('|', $assetProxyId);
         return $this->sendAuthenticatedRequest(
-            $this->authorization,
             $scheme . '/' . $id,
             'GET',
             []
@@ -156,7 +155,6 @@ final class CantoClient
         }
 
         return $this->sendAuthenticatedRequest(
-            $this->authorization,
             $pathAndQuery,
             'GET',
             []
@@ -169,7 +167,7 @@ final class CantoClient
      */
     public function user(): array
     {
-        $response = $this->sendAuthenticatedRequest($this->authorization, 'user');
+        $response = $this->sendAuthenticatedRequest('user');
         if ($response->getStatusCode() === 200) {
             return \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         }
@@ -182,7 +180,7 @@ final class CantoClient
      */
     public function tree(): array
     {
-        $response = $this->sendAuthenticatedRequest($this->authorization, 'tree');
+        $response = $this->sendAuthenticatedRequest('tree');
         if ($response->getStatusCode() === 200) {
             return \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         }
@@ -241,7 +239,7 @@ final class CantoClient
      * @return RequestInterface
      * @throws OAuthClientException
      */
-    public function getAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): RequestInterface
+    private function getAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): RequestInterface
     {
         $accessToken = $authorization->getAccessToken();
         if ($accessToken === null) {
@@ -262,19 +260,22 @@ final class CantoClient
     /**
      * Sends an HTTP request to an OAuth 2.0 service provider using Bearer token authentication
      *
-     * @param Authorization $authorization
      * @param string $uriPathAndQuery
      * @param string $method
      * @param array $bodyFields
      * @return Response
      * @throws OAuthClientException
      */
-    public function sendAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
+    public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
     {
+        if ($this->authorization === null) {
+            $this->authenticate();
+        }
+
         if ($this->httpClient === null) {
             $this->httpClient = new Client(['allow_redirects' => true]);
         }
-        return $this->httpClient->send($this->getAuthenticatedRequest($authorization, $uriPathAndQuery, $method, $bodyFields));
+        return $this->httpClient->send($this->getAuthenticatedRequest($this->authorization, $uriPathAndQuery, $method, $bodyFields));
     }
 
 }

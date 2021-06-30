@@ -246,8 +246,6 @@ class CantoAssetSource implements AssetSourceInterface
                 $this->appId,
                 $this->appSecret
             );
-
-            $this->cantoClient->authenticate();
         }
         return $this->cantoClient;
     }
