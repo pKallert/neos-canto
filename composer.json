@@ -4,11 +4,11 @@
     "name": "flownative/neos-canto",
     "license": "MIT",
     "require": {
-        "neos/flow": "6.* || dev-master",
-        "neos/media": "5.* || 6.* || dev-master",
+        "neos/flow": "6.* || 7.* || dev-master",
+        "neos/media": "5.* || 7.* || dev-master",
         "guzzlehttp/guzzle": "6.*",
         "behat/transliterator": "~1.0",
-        "flownative/oauth2-client": "^2.1.0"
+        "flownative/oauth2-client": "^3.0"
     },
     "autoload": {
         "psr-4": {
