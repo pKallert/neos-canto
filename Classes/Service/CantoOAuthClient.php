@@ -21,47 +21,30 @@ use League\OAuth2\Client\Provider\GenericProvider;
  */
 class CantoOAuthClient extends OAuthClient
 {
+    public const SERVICE_TYPE = 'canto';
+
     protected string $baseUri = 'https://oauth.canto.global/oauth/api/oauth2';
 
-    /**
-     * @return string
-     */
     public function getServiceType(): string
     {
-        return 'canto';
+        return self::SERVICE_TYPE;
     }
 
-    /**
-     * For example: https://oauth.canto.global/oauth/api/oauth2
-     *
-     * @param string $baseUri
-     */
     public function setBaseUri(string $baseUri): void
     {
         $this->baseUri = $baseUri;
     }
 
-    /**
-     * For example: https://oauth.canto.global/oauth/api/oauth2
-     *
-     * @return string
-     */
     public function getBaseUri(): string
     {
         return $this->baseUri;
     }
 
-    /**
-     * @return string
-     */
     public function getAccessTokenUri(): string
     {
         return trim($this->getBaseUri(), '/') . '/token';
     }
 
-    /**
-     * @return string
-     */
     public function getAuthorizeTokenUri(): string
     {
         return trim($this->getBaseUri(), '/') . '/token/authorize';
@@ -74,15 +57,9 @@ class CantoOAuthClient extends OAuthClient
 
     public function getClientId(): string
     {
-        // TODO: Implement getClientId() method.
         throw new \RuntimeException('not implemented');
     }
 
-    /**
-     * @param string $clientId
-     * @param string $clientSecret
-     * @return GenericProvider
-     */
     protected function createOAuthProvider(string $clientId, string $clientSecret): GenericProvider
     {
         return new CantoOAuthProvider([

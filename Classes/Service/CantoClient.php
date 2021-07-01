@@ -66,12 +66,10 @@ final class CantoClient
         $this->apiBaseUri = $apiBaseUri;
         $this->appId = $appId;
         $this->appSecret = $appSecret;
+
+        $this->httpClient = new Client(['allow_redirects' => true]);
     }
 
-    /**
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
-     */
     private function authenticate(): void
     {
         $oAuthClient = new CantoOAuthClient('canto');
@@ -188,10 +186,6 @@ final class CantoClient
     {
         [$scheme, $id] = explode('|', $assetProxyId);
 
-        if ($this->httpClient === null) {
-            $this->httpClient = new Client(['allow_redirects' => true]);
-        }
-
         $accessToken = $this->authorization->getAccessToken();
 
         $apiBinaryBaseUri = str_replace('/api/', '/api_binary/', $this->apiBaseUri);
@@ -264,10 +258,6 @@ final class CantoClient
             $this->authenticate();
         }
 
-        if ($this->httpClient === null) {
-            $this->httpClient = new Client(['allow_redirects' => true]);
-        }
         return $this->httpClient->send($this->getAuthenticatedRequest($this->authorization, $uriPathAndQuery, $method, $bodyFields));
     }
-
 }
