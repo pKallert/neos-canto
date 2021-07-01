@@ -47,6 +47,11 @@ final class CantoClient
     private $appSecret;
 
     /**
+     * @var string
+     */
+    private $serviceName;
+
+    /**
      * @var Authorization
      */
     private $authorization;
@@ -60,19 +65,21 @@ final class CantoClient
      * @param string $apiBaseUri
      * @param string $appId
      * @param string $appSecret
+     * @param string $serviceName
      */
-    public function __construct(string $apiBaseUri, string $appId, string $appSecret)
+    public function __construct(string $apiBaseUri, string $appId, string $appSecret, string $serviceName)
     {
         $this->apiBaseUri = $apiBaseUri;
         $this->appId = $appId;
         $this->appSecret = $appSecret;
+        $this->serviceName = $serviceName;
 
         $this->httpClient = new Client(['allow_redirects' => true]);
     }
 
     private function authenticate(): void
     {
-        $oAuthClient = new CantoOAuthClient('canto');
+        $oAuthClient = new CantoOAuthClient($this->serviceName);
 
         $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant('canto', $this->appId, $this->appSecret, 'admin');
         $this->authorization = $oAuthClient->getAuthorization($authorizationId);
