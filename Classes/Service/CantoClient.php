@@ -20,6 +20,7 @@ use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Exception\StopActionException;
@@ -119,12 +120,14 @@ final class CantoClient
 
     private function getCurrentUri(): UriInterface
     {
-        // TODO This IMMEDIATELY needs to be improved!
-        return new Uri('http://neos-mvp.localbeach.net/neos/management/media');
+        // TODO This needs to be improved!?
+        $currentUri = ServerRequest::getUriFromGlobals();
+        return $currentUri->withPort(null);
     }
 
     private function redirectToUri(UriInterface $uri)
     {
+        // TODO Is there an even better way?
         header('Location: ' . $uri);
         throw new StopActionException('Canto login required', 1625222167);
     }

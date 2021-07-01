@@ -5,6 +5,12 @@ Neos:
         'Flownative.Canto':
           position: 'after Neos.Neos'
 
+    http:
+      middlewares:
+        'Flownative.Canto.authorizationFinisher':
+          position: 'after securityEntryPoint'
+          middleware: 'Flownative\Canto\Middleware\AuthorizationFinisherMiddleware'
+
   Media:
     assetSources:
       'flownative-canto':
