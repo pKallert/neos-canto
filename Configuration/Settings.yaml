@@ -15,7 +15,6 @@ Neos:
           appId: '%env:FLOWNATIVE_CANTO_OAUTH_APP_ID%'
           appSecret: '%env:FLOWNATIVE_CANTO_OAUTH_APP_SECRET%'
           apiBaseUri: '%env:FLOWNATIVE_CANTO_API_BASE_URI%'
-          oAuthBaseUri: '%env:FLOWNATIVE_CANTO_OAUTH_BASE_URI%'
 
   Neos:
     modules:

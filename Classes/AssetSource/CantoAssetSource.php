@@ -53,11 +53,6 @@ class CantoAssetSource implements AssetSourceInterface
     /**
      * @var string
      */
-    private $oAuthBaseUri;
-
-    /**
-     * @var string
-     */
     private $appId;
 
     /**
@@ -109,10 +104,6 @@ class CantoAssetSource implements AssetSourceInterface
                 case 'apiBaseUri':
                     $uri = new Uri($optionValue);
                     $this->apiBaseUri = $uri->__toString();
-                break;
-                case 'oAuthBaseUri':
-                    $uri = new Uri($optionValue);
-                    $this->oAuthBaseUri = $uri->__toString();
                 break;
                 case 'appId':
                     if (!is_string($optionValue) || empty($optionValue)) {
@@ -242,7 +233,6 @@ class CantoAssetSource implements AssetSourceInterface
         if ($this->cantoClient === null) {
             $this->cantoClient = new CantoClient(
                 $this->apiBaseUri,
-                $this->oAuthBaseUri,
                 $this->appId,
                 $this->appSecret
             );

@@ -39,11 +39,6 @@ final class CantoClient
     /**
      * @var string
      */
-    private $oAuthBaseUri;
-
-    /**
-     * @var string
-     */
     private $appId;
 
     /**
@@ -63,14 +58,12 @@ final class CantoClient
 
     /**
      * @param string $apiBaseUri
-     * @param string $oauthBaseUri
      * @param string $appId
      * @param string $appSecret
      */
-    public function __construct(string $apiBaseUri, string $oauthBaseUri, string $appId, string $appSecret)
+    public function __construct(string $apiBaseUri, string $appId, string $appSecret)
     {
         $this->apiBaseUri = $apiBaseUri;
-        $this->oAuthBaseUri = $oauthBaseUri;
         $this->appId = $appId;
         $this->appSecret = $appSecret;
     }
@@ -82,7 +75,6 @@ final class CantoClient
     private function authenticate(): void
     {
         $oAuthClient = new CantoOAuthClient('canto');
-        $oAuthClient->setBaseUri($this->oAuthBaseUri);
 
         $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant('canto', $this->appId, $this->appSecret, 'admin');
         $this->authorization = $oAuthClient->getAuthorization($authorizationId);

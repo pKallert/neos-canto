@@ -21,10 +21,7 @@ use League\OAuth2\Client\Provider\GenericProvider;
  */
 class CantoOAuthClient extends OAuthClient
 {
-    /**
-     * @var string
-     */
-    protected $baseUri;
+    protected string $baseUri = 'https://oauth.canto.global/oauth/api/oauth2';
 
     /**
      * @return string
