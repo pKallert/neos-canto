@@ -61,4 +61,13 @@ final class CantoOAuthProvider extends GenericProvider
         $preparedTokenResponse = $this->prepareAccessTokenResponse($normalizedResponse);
         return $this->createAccessToken($preparedTokenResponse, $grant);
     }
+
+    protected function getAuthorizationParameters(array $options): array
+    {
+        $parameters =  parent::getAuthorizationParameters($options);
+        $parameters['app_id'] = $parameters['client_id'];
+        unset($parameters['client_id'], $parameters['approval_prompt']);
+
+        return $parameters;
+    }
 }

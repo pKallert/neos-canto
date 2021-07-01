@@ -13,18 +13,21 @@ namespace Flownative\Canto\Service;
  * source code.
  */
 
-use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Domain\Model\AccountAuthorization;
+use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use League\OAuth2\Client\Token\AccessToken;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Exception\StopActionException;
+use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Canto API client
@@ -50,6 +53,18 @@ final class CantoClient
      * @var string
      */
     private $serviceName;
+
+    /**
+     * @Flow\Inject
+     * @var Context
+     */
+    protected $securityContext;
+
+    /**
+     * @Flow\Inject
+     * @var AccountAuthorizationRepository
+     */
+    protected $accountAuthorizationRepository;
 
     /**
      * @var Authorization
@@ -81,17 +96,37 @@ final class CantoClient
     {
         $oAuthClient = new CantoOAuthClient($this->serviceName);
 
-        $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant('canto', $this->appId, $this->appSecret, 'admin');
-        $this->authorization = $oAuthClient->getAuthorization($authorizationId);
+        if ($this->securityContext->isInitialized()) {
+            $account = $this->securityContext->getAccount();
+            $accountAuthorization = $account ? $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($account->getAccountIdentifier()) : null;
 
-        if ($this->authorization === null) {
-            $oAuthClient->requestAccessToken('canto', $this->appId, $this->appSecret, 'admin');
-            $this->authorization = $oAuthClient->getAuthorization($authorizationId);
+            if ($accountAuthorization instanceof AccountAuthorization) {
+                $this->authorization = $oAuthClient->getAuthorization($accountAuthorization->getAuthorizationId());
+            }
         }
 
         if ($this->authorization === null) {
-            throw new AuthenticationFailedException('Authentication failed: ' . ($result->help ?? 'Unknown cause'), 1607086346);
+            $returnToUri = $this->getCurrentUri();
+            $loginUri = $oAuthClient->startAuthorization(
+                $this->appId,
+                $this->appSecret,
+                $returnToUri,
+                ''
+            );
+            $this->redirectToUri($loginUri);
         }
+    }
+
+    private function getCurrentUri(): UriInterface
+    {
+        // TODO This IMMEDIATELY needs to be improved!
+        return new Uri('http://neos-mvp.localbeach.net/neos/management/media');
+    }
+
+    private function redirectToUri(UriInterface $uri)
+    {
+        header('Location: ' . $uri);
+        throw new StopActionException('Canto login required', 1625222167);
     }
 
     /**
@@ -193,7 +228,14 @@ final class CantoClient
     {
         [$scheme, $id] = explode('|', $assetProxyId);
 
+        if ($this->authorization === null) {
+            $this->authenticate();
+        }
+
         $accessToken = $this->authorization->getAccessToken();
+        if ($accessToken === null) {
+            throw new OAuthClientException(sprintf('Canto: Failed getting an authenticated request for client ID "%s" because the authorization contained no access token', $this->authorization->getClientId()), 1625155543);
+        }
 
         $apiBinaryBaseUri = str_replace('/api/', '/api_binary/', $this->apiBaseUri);
 
@@ -212,14 +254,6 @@ final class CantoClient
             return new Uri($response->getBody()->getContents());
         }
         return null;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAccessToken(): ?AccessToken
-    {
-        return $this->authorization->getAccessToken();
     }
 
     /**

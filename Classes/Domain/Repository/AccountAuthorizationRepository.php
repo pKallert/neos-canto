@@ -13,20 +13,20 @@ namespace Flownative\Canto\Domain\Repository;
  * source code.
  */
 
-use Flownative\Canto\Domain\Model\ClientSecret;
+use Flownative\Canto\Domain\Model\AccountAuthorization;
 use Neos\Flow\Annotations\Scope;
 use Neos\Flow\Persistence\Repository;
 
 /**
  * @Scope("singleton")
  */
-class ClientSecretRepository extends Repository
+class AccountAuthorizationRepository extends Repository
 {
     /**
      * @param string $accountIdentifier
-     * @return ClientSecret|null
+     * @return AccountAuthorization|null
      */
-    public function findOneByFlowAccountIdentifier(string $accountIdentifier): ?ClientSecret
+    public function findOneByFlowAccountIdentifier(string $accountIdentifier): ?AccountAuthorization
     {
         return $this->__call('findOneByFlowAccountIdentifier', [$accountIdentifier]);
     }

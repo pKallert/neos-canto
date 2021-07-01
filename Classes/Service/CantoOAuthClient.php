@@ -47,7 +47,7 @@ class CantoOAuthClient extends OAuthClient
 
     public function getAuthorizeTokenUri(): string
     {
-        return trim($this->getBaseUri(), '/') . '/token/authorize';
+        return trim($this->getBaseUri(), '/') . '/authorize';
     }
 
     public function getResourceOwnerUri(): string

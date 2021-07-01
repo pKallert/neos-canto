@@ -13,14 +13,13 @@ namespace Flownative\Canto\Domain\Model;
  * source code.
  */
 
-use Doctrine\ORM\Mapping as ORM;
 use Neos\Flow\Annotations\Entity;
 use Neos\Flow\Annotations\Identity;
 
 /**
  * @Entity()
  */
-class ClientSecret
+class AccountAuthorization
 {
     /**
      * @Identity()
@@ -29,16 +28,9 @@ class ClientSecret
     protected $flowAccountIdentifier;
 
     /**
-     * @ORM\Column(type="text")
      * @var string
      */
-    protected $refreshToken;
-
-    /**
-     * @ORM\Column(nullable=true, type="text")
-     * @var string
-     */
-    protected $accessToken;
+    protected $authorizationId;
 
     /**
      * @return string
@@ -59,32 +51,16 @@ class ClientSecret
     /**
      * @return string
      */
-    public function getRefreshToken(): string
+    public function getAuthorizationId(): string
     {
-        return $this->refreshToken;
+        return $this->authorizationId;
     }
 
     /**
-     * @param string $refreshToken
+     * @param string $authorizationId
      */
-    public function setRefreshToken(string $refreshToken): void
+    public function setAuthorizationId(string $authorizationId): void
     {
-        $this->refreshToken = $refreshToken;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAccessToken(): ?string
-    {
-        return $this->accessToken;
-    }
-
-    /**
-     * @param string|null $accessToken
-     */
-    public function setAccessToken(?string $accessToken): void
-    {
-        $this->accessToken = $accessToken;
+        $this->authorizationId = $authorizationId;
     }
 }
