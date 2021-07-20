@@ -8,12 +8,12 @@ pictures and other documents) stored in [Canto](https://www.canto.com/)
 in your Neos website as if these assets were native Neos assets.
 
 ## About Canto
+
 Canto offers a extensive solutions for digital asset management. The
 software makes working with pictures, graphics and video files easier.
 
 ## Key Features
 
-- authentication setup via own backend module
 - seamless integration into the Neos media browser
 - automatic import and clean up of media assets from Canto
 
@@ -29,11 +29,58 @@ $ composer require flownative/neos-canto:0
 
 ## Enabling Canto API access
 
-tbd.
+1. In Canto go to Settings > Configuration Options > API 
+2. Click "Create API Key"
+3. Fill in a name that helps you understand what the key is for
+4. Fill in the "Redirect URL", using `http://<www.your-site.com>/oauth2/canto/canto/finishauthorization`,
+   using your own domain(!)
+5. Note down "App ID", "App Secret" and "Website" of the new key
 
-## Additional configuration options
+## Configure the Canto connection
 
-tbd.
+You need to set the "App ID" and "App Secret" from the generated API key as well
+as the URLs you are using to access Canto (since they depend on your setup.)
+
+The URLs are a base URI built using the "Website" value appended with `api/v1`
+and an URI used for authentication that uses the top-level domain of the "Website"
+in `https://oauth.canto.global/oauth/api/oauth2`.
+
+Set those values using the environment variables
+
+- `FLOWNATIVE_CANTO_OAUTH_APP_ID`
+- `FLOWNATIVE_CANTO_OAUTH_APP_SECRET`
+- `FLOWNATIVE_CANTO_API_BASE_URI`
+- `FLOWNATIVE_CANTO_OAUTH_BASE_URI`
+
+or directly in `Settings.yaml` 
+
+```yaml
+Neos:
+  Media:
+    assetSources:
+      'flownative-canto':
+        assetSourceOptions:
+          appId: '1234567890abcdef'
+          appSecret: '1234567890abcdef1234567890abcdef'
+          apiBaseUri: 'https://acme.canto.global/api/v1'
+```
+
+and `Objects.yaml`
+
+```yaml
+Flownative\Canto\Service\CantoOAuthClient:
+  properties:
+    baseUri:
+      value: 'https://oauth.canto.global/oauth/api/oauth2'
+```
+
+## Using the Canto asset source in Neos
+
+In the Media module you should see two asset sources, one called "Neos" and
+one called "Canto". If you switch to the Canto asset source and are not yet
+(or no longer) logged in to Canto, you will be redirected to the Canto login
+and asked to authorize access for Neos. After a redirect back to Neos you
+can now browse/search Canto and use assets from it in Neos as usual.
 
 ## Cleaning up unused assets
 
@@ -61,8 +108,8 @@ add two additional flags which make this command non-interactive:
 
 ## Credits and license
 
-This plugin was sponsored by [Paessler](https://www.paessler.com/) and
-its initial version was developed by Robert Lemke of
+This plugin was sponsored by [Paessler](https://www.paessler.com/) and its
+initial version was developed by Robert Lemke and Karsten Dambekalns of
 [Flownative](https://www.flownative.com).
 
 See LICENSE for license details.
