@@ -125,7 +125,7 @@ final class CantoClient
         return $currentUri->withPort(null);
     }
 
-    private function redirectToUri(UriInterface $uri)
+    private function redirectToUri(UriInterface $uri): void
     {
         // TODO Is there an even better way?
         header('Location: ' . $uri);

@@ -13,20 +13,11 @@ namespace Flownative\Canto\Service;
  * source code.
  */
 
-use Doctrine\ORM\ORMException;
-use Flownative\Canto\Domain\Model\AccountAuthorization;
-use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
-use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClient;
-use Flownative\OAuth2\Client\OAuthClientException;
-use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\GenericProvider;
-use Neos\Cache\Exception;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Neos\Flow\Security\Account;
 use Neos\Flow\Security\Context;
-use Psr\Http\Message\UriInterface;
 
 /**
  * Canto OAuth Client
@@ -42,12 +33,6 @@ class CantoOAuthClient extends OAuthClient
      * @var Context
      */
     protected $securityContext;
-
-    /**
-     * @Flow\Inject
-     * @var AccountAuthorizationRepository
-     */
-    protected $accountAuthorizationRepository;
 
     /**
      * @Flow\Inject

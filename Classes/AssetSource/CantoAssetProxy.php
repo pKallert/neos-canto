@@ -113,6 +113,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         // static used here despite this being a final class because Flow still builds a proxy and self causes
         // an error because the returned Flownative\Canto\AssetSource\CantoAssetProxy_Original is not the
         // declared Flownative\Canto\AssetSource\CantoAssetProxy
+        /** @noinspection PhpUnnecessaryStaticReferenceInspection */
         $assetProxy = new static();
         $assetProxy->assetSource = $assetSource;
         $assetProxy->identifier = $jsonObject->scheme . '|' . $jsonObject->id;

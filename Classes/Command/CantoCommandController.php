@@ -66,9 +66,6 @@ class CantoCommandController extends CommandController
             if (!$asset instanceof Asset) {
                 continue;
             }
-            if (!$asset instanceof AssetSourceAwareInterface) {
-                continue;
-            }
             if ($asset->getAssetSourceIdentifier() !== $assetSourceIdentifier) {
                 continue;
             }
