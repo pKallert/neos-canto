@@ -5,11 +5,15 @@ Neos:
         'Flownative.Canto':
           position: 'after Neos.Neos'
 
-    http:
-      middlewares:
-        'Flownative.Canto.authorizationFinisher':
-          position: 'after securityEntryPoint'
-          middleware: 'Flownative\Canto\Middleware\AuthorizationFinisherMiddleware'
+    security:
+      authentication:
+        providers:
+          'Neos.Neos:Backend':
+            requestPatterns:
+              'Flownative.OAuth2.Client:OAuthController':
+                pattern: 'ControllerObjectName'
+                patternOptions:
+                  controllerObjectNamePattern: 'Flownative\OAuth2\Client\Controller\OAuthController'
 
   Media:
     assetSources:
