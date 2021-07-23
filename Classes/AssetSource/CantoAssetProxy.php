@@ -119,7 +119,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $assetProxy->identifier = $jsonObject->scheme . '|' . $jsonObject->id;
         $assetProxy->label = $jsonObject->name;
         $assetProxy->filename = $jsonObject->name;
-        $assetProxy->lastModified = \DateTimeImmutable::createFromFormat('U', $jsonObject->time);
+        $assetProxy->lastModified = \DateTime::createFromFormat('U', $jsonObject->time);
         $assetProxy->fileSize = (int)$jsonObject->size;
         $assetProxy->mediaType = MediaTypes::getMediaTypeFromFilename($jsonObject->name);
         $assetProxy->tags = $jsonObject->tag ?? [];
@@ -166,9 +166,9 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     }
 
     /**
-     * @return \DateTimeInterface
+     * @return \DateTime
      */
-    public function getLastModified(): \DateTimeInterface
+    public function getLastModified(): \DateTime
     {
         return $this->lastModified;
     }
