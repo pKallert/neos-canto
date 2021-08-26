@@ -232,7 +232,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
             break;
             case 'All':
             default:
-                $formatTypes = ['image', 'video', 'audio', 'document'];
+                $formatTypes = ['image', 'video', 'audio', 'document', 'presentation', 'other'];
             break;
         }
 
