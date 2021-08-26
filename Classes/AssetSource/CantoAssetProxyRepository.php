@@ -17,7 +17,6 @@ use Exception;
 use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
 use Neos\Cache\Frontend\StringFrontend;
-use Neos\Cache\Frontend\VariableFrontend;
 use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
 use Neos\Media\Domain\Model\AssetSource\AssetNotFoundExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
@@ -57,7 +56,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     private $orderings = [];
 
     /**
-     * @var VariableFrontend
+     * @var StringFrontend
      */
     protected $assetProxyCache;
 
@@ -72,14 +71,20 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      */
     public function getAssetProxy(string $identifier): AssetProxyInterface
     {
-        $client = $this->assetSource->getCantoClient();
-
-        $response = $client->getFile($identifier);
-        $responseObject = \GuzzleHttp\json_decode($response->getBody());
+        $cacheEntryIdentifier = $this->getCacheEntryIdentifier($identifier);
+        $cacheEntry = $this->assetProxyCache->get($cacheEntryIdentifier);
+        if ($cacheEntry) {
+            $responseObject = \GuzzleHttp\json_decode($cacheEntry);
+        } else {
+            $response = $this->assetSource->getCantoClient()->getFile($identifier);
+            $responseObject = \GuzzleHttp\json_decode($response->getBody());
+        }
 
         if (!$responseObject instanceof \stdClass) {
             throw new AssetNotFoundException('Asset not found', 1526636260);
         }
+
+        $this->assetProxyCache->set($cacheEntryIdentifier, \GuzzleHttp\json_encode($responseObject, JSON_FORCE_OBJECT));
 
         return CantoAssetProxy::fromJsonObject($responseObject, $this->assetSource);
     }
@@ -163,6 +168,15 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function orderBy(array $orderings): void
     {
         $this->orderings = $orderings;
+    }
+
+    /**
+     * @param string $cantoIdentifier e.g. image|dh008220hh41h20s1o0mkvmb1l
+     * @return string
+     */
+    public function getCacheEntryIdentifier(string $cantoIdentifier): string
+    {
+        return sha1($cantoIdentifier);
     }
 
     /**
