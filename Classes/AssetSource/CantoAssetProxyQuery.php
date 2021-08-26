@@ -220,27 +220,22 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         switch ($this->assetTypeFilter) {
             case 'Image':
                 $formatTypes = ['image'];
-                $fileTypes = [];
             break;
             case 'Video':
                 $formatTypes = ['video'];
-                $fileTypes = [];
             break;
             case 'Audio':
                 $formatTypes = ['audio'];
-                $fileTypes = [];
             break;
             case 'Document':
                 $formatTypes = ['document'];
-                $fileTypes = ['pdf'];
             break;
             case 'All':
             default:
                 $formatTypes = ['image', 'video', 'audio', 'document'];
-                $fileTypes = [];
             break;
         }
 
-        return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $fileTypes, $this->offset, $limit, $orderings);
+        return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->offset, $limit, $orderings);
     }
 }

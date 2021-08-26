@@ -161,14 +161,13 @@ final class CantoClient
     /**
      * @param string $keyword
      * @param array $formatTypes
-     * @param array $fileTypes
      * @param int $offset
      * @param int $limit
      * @param array $orderings
      * @return ResponseInterface
      * @throws OAuthClientException
      */
-    public function search(string $keyword, array $formatTypes, array $fileTypes, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
+    public function search(string $keyword, array $formatTypes, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
 
