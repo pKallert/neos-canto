@@ -106,7 +106,7 @@ final class CantoClient
             }
         }
 
-        if ($this->authorization === null) {
+        if ($this->authorization === null || ($this->authorization->getAccessToken() && $this->authorization->getAccessToken()->hasExpired())) {
             $returnToUri = $this->getCurrentUri();
             $loginUri = $oAuthClient->startAuthorization(
                 $this->appId,
