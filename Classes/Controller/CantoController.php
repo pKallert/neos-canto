@@ -32,11 +32,11 @@ class CantoController extends AbstractModuleController
      */
     public function indexAction(): void
     {
-        $apiBaseUri = $this->assetSourcesConfiguration['flownative-canto']['assetSourceOptions']['apiBaseUri'];
+        $apiBaseUri = $this->assetSourcesConfiguration[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]['assetSourceOptions']['apiBaseUri'];
         $this->view->assign('apiBaseUri', $apiBaseUri);
 
         try {
-            $assetSource = new CantoAssetSource('flownative-canto', $this->assetSourcesConfiguration['flownative-canto']['assetSourceOptions']);
+            $assetSource = new CantoAssetSource(CantoAssetSource::ASSET_SOURCE_IDENTIFIER, $this->assetSourcesConfiguration[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]['assetSourceOptions']);
             $client = $assetSource->getCantoClient();
             $this->view->assign('user', $client->user());
 

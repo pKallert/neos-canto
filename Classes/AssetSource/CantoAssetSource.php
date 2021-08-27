@@ -25,6 +25,8 @@ use Neos\Utility\MediaTypes;
 
 class CantoAssetSource implements AssetSourceInterface
 {
+    public const ASSET_SOURCE_IDENTIFIER = 'flownative-canto';
+
     /**
      * @var bool
      */

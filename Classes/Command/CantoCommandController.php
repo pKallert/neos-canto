@@ -35,7 +35,7 @@ class CantoCommandController extends CommandController
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
      */
-    public function tagUsedAssetsCommand(string $assetSource = 'flownative-canto', bool $quiet = false): void
+    public function tagUsedAssetsCommand(string $assetSource = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = false): void
     {
         $assetSourceIdentifier = $assetSource;
         $iterator = $this->assetRepository->findAllIterator();

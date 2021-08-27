@@ -13,6 +13,7 @@ namespace Flownative\Canto\Service;
  * source code.
  */
 
+use Flownative\Canto\AssetSource\CantoAssetSource;
 use Flownative\Canto\Domain\Model\AccountAuthorization;
 use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
 use Flownative\OAuth2\Client\OAuthClient;
@@ -30,8 +31,6 @@ use Psr\Http\Message\UriInterface;
  */
 class CantoOAuthClient extends OAuthClient
 {
-    public const SERVICE_TYPE = 'canto';
-
     protected string $baseUri = 'https://oauth.canto.global/oauth/api/oauth2';
 
     /**
@@ -54,7 +53,7 @@ class CantoOAuthClient extends OAuthClient
 
     public function getServiceType(): string
     {
-        return self::SERVICE_TYPE;
+        return CantoAssetSource::ASSET_SOURCE_IDENTIFIER;
     }
 
     public function setBaseUri(string $baseUri): void
@@ -136,7 +135,7 @@ class CantoOAuthClient extends OAuthClient
         $this->persistenceManager->allowObject($accountAuthorization);
         $this->persistenceManager->persistAll();
 
-        $queryParameterName = CantoOAuthClient::generateAuthorizationIdQueryParameterName(self::SERVICE_TYPE);
+        $queryParameterName = CantoOAuthClient::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
         $queryParameters = [];
         parse_str($returnUri->getQuery(), $queryParameters);
         unset($queryParameters[$queryParameterName]);
