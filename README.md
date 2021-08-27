@@ -29,7 +29,7 @@ $ composer require flownative/neos-canto
 
 ## Enabling Canto API access
 
-1. In Canto go to Settings > Configuration Options > API 
+1. In Canto go to Settings > Configuration Options > API > API Keys
 2. Click "Create API Key"
 3. Fill in a name that helps you understand what the key is for
 4. Fill in the "Redirect URL", using `http://<www.your-site.com>/flownative-canto/authorization/finish`,
@@ -81,6 +81,51 @@ one called "Canto". If you switch to the Canto asset source and are not yet
 (or no longer) logged in to Canto, you will be redirected to the Canto login
 and asked to authorize access for Neos. After a redirect back to Neos you
 can now browse/search Canto and use assets from it in Neos as usual.
+
+## Change notification from Canto
+
+The package provides webhooks that can be used to notify of changes in Canto.
+
+When assets in Canto are modified, those hooks trigger the needed update on the
+Neos side.
+
+- For *metadata updates* the changes are transferred to the imported asset, as
+ far as the metadata is used in Neos.
+- If *new versions* are added, those are imported and replace the existing asset
+  in Neos.
+
+### Enabling webhooks in Canto
+
+1. In Canto go to Settings > Configuration Options > API > Webhooks
+2. Generate some random string for use as "Secure Token"
+3. Configure webhooks for "Update Metadata", "Add New Version"
+   1. Use the matching URL for each hook as shown below
+   2. Chose JSON as "Content Type"
+   3. Fill in the "Secure Token"
+   4. Click "Add"
+
+Event           | Webhook URL (path)
+--------------- | --------------------------------
+Update Metadata | /flownative-canto/webhook/update
+Add New Version | /flownative-canto/webhook/add
+
+Note: The webhook URL must be prefixed with the publicly accessible hostname of
+your Neos instance, and HTTPS should be used to secure the secure token!
+
+### Configure secure token in Neos
+
+Set the "Secure Token" value using the environment variable
+
+- `FLOWNATIVE_CANTO_WEBHOOK_TOKEN`
+
+or directly in `Settings.yaml`
+
+```yaml
+Flownative:
+  Canto:
+    webhook:
+      token: 'some-random-string-of-your-choice'
+```
 
 ## Cleaning up unused assets
 

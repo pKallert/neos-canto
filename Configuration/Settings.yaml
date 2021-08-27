@@ -1,9 +1,22 @@
+Flownative:
+  Canto:
+    webhook:
+      pathPrefix: '/flownative-canto/webhook/'
+      # A token that can be used to secure webhook invocations; used only if set
+      token: '%env:FLOWNATIVE_CANTO_WEBHOOK_TOKEN%'
+
 Neos:
   Flow:
     mvc:
       routes:
         'Flownative.Canto':
           position: 'start'
+
+    http:
+      middlewares:
+        'cantoWebhook':
+          position: 'before session'
+          middleware: 'Flownative\Canto\Middleware\WebhookMiddleware'
 
     security:
       authentication:
