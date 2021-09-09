@@ -29,12 +29,21 @@ $ composer require flownative/neos-canto
 
 ## Enabling Canto API access
 
-1. In Canto go to Settings > Configuration Options > API 
+1. In Canto go to Settings > Configuration Options > API > API Keys
 2. Click "Create API Key"
 3. Fill in a name that helps you understand what the key is for
 4. Fill in the "Redirect URL", using `http://<www.your-site.com>/flownative-canto/authorization/finish`,
    using your own domain(!)
 5. Note down "App ID", "App Secret" and "Website" of the new key
+
+### Allow client credentials mode for API key
+
+To be able to use the Canto connection from the command line, client credentials
+mode must be enabled.
+
+1. In Canto go to Settings > Configuration Options > API > API Keys
+2. Edit the API key you use for the Neos integration
+3. Enable "Support Client Credentials Mode" and click "Save"
 
 ## Configure the Canto connection
 
