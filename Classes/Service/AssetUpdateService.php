@@ -14,7 +14,7 @@ namespace Flownative\Canto\Service;
  */
 
 /**
- * Canto API client
+ * Canto asset update service for webhook handling
  */
 final class AssetUpdateService
 {

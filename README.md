@@ -112,6 +112,12 @@ Add New Version | /flownative-canto/webhook/add
 Note: The webhook URL must be prefixed with the publicly accessible hostname of
 your Neos instance, and HTTPS should be used to secure the secure token!
 
+### Allow client credentials mode for API key
+
+1. In Canto go to Settings > Configuration Options > API > API Keys
+2. Edit the API key you use for the Neos integration
+3. Enable "Support Client Credentials Mode" and click "Save"
+
 ### Configure secure token in Neos
 
 Set the "Secure Token" value using the environment variable

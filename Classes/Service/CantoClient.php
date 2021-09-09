@@ -15,6 +15,7 @@ namespace Flownative\Canto\Service;
 
 use Flownative\Canto\Domain\Model\AccountAuthorization;
 use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
+use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
@@ -85,11 +86,15 @@ final class CantoClient
 
     /**
      * @param string $apiBaseUri
+     * @param string $appId
+     * @param string $appSecret
      * @param string $serviceName
      */
-    public function __construct(string $apiBaseUri, string $serviceName)
+    public function __construct(string $apiBaseUri, string $appId, string $appSecret, string $serviceName)
     {
         $this->apiBaseUri = $apiBaseUri;
+        $this->appId = $appId;
+        $this->appSecret = $appSecret;
         $this->serviceName = $serviceName;
 
         $this->httpClient = new Client(['allow_redirects' => true]);
@@ -118,7 +123,15 @@ final class CantoClient
                 );
             }
         } else {
-            throw new \RuntimeException('Security context not initialized', 1631821639);
+            $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant($this->serviceName, $this->appId, $this->appSecret, '');
+            $this->authorization = $oAuthClient->getAuthorization($authorizationId);
+            if ($this->authorization === null) {
+                $oAuthClient->requestAccessToken($this->serviceName, $this->appId, $this->appSecret, '');
+                $this->authorization = $oAuthClient->getAuthorization($authorizationId);
+            }
+            if ($this->authorization === null) {
+                throw new AuthenticationFailedException('Authentication failed: ' . ($result->help ?? 'Unknown cause'), 1630059881);
+            }
         }
     }
 
