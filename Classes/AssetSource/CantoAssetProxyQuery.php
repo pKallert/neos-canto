@@ -25,7 +25,7 @@ use Psr\Log\LoggerInterface as SystemLoggerInterface;
 /**
  *
  */
-final class CantoAssetProxyQuery implements AssetProxyQueryInterface
+/* final */ class CantoAssetProxyQuery implements AssetProxyQueryInterface
 {
     /**
      * @var CantoAssetSource
@@ -213,7 +213,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @throws ConnectionException
      * @throws IdentityProviderException
      */
-    private function sendSearchRequest(int $limit, array $orderings): Response
+    /* private */ protected function sendSearchRequest(int $limit, array $orderings): Response
     {
         $searchTerm = $this->searchTerm;
 

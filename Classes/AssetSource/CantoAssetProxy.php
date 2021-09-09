@@ -30,7 +30,7 @@ use stdClass;
 /**
  *
  */
-final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface, ProvidesOriginalUriInterface, SupportsIptcMetadataInterface
+/* final */ class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface, ProvidesOriginalUriInterface, SupportsIptcMetadataInterface
 {
     /**
      * @var CantoAssetSource
