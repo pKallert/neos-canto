@@ -3,17 +3,17 @@ Neos:
     mvc:
       routes:
         'Flownative.Canto':
-          position: 'after Neos.Neos'
+          position: 'start'
 
     security:
       authentication:
         providers:
           'Neos.Neos:Backend':
             requestPatterns:
-              'Flownative.OAuth2.Client:OAuthController':
+              'Flownative.OCanto:AuthorizationController':
                 pattern: 'ControllerObjectName'
                 patternOptions:
-                  controllerObjectNamePattern: 'Flownative\OAuth2\Client\Controller\OAuthController'
+                  controllerObjectNamePattern: 'Flownative\Canto\Controller\AuthorizationController'
 
   Media:
     assetSources:
