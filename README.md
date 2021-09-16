@@ -24,7 +24,7 @@ For your existing project, simply include `flownative/neos-canto` into
 the dependencies of your Flow or Neos distribution:
 
 ```bash
-$ composer require flownative/neos-canto:0
+$ composer require flownative/neos-canto
 ```
 
 ## Enabling Canto API access
