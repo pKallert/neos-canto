@@ -61,7 +61,7 @@ class AuthorizationController extends ActionController
         $uri = $client->finishAuthorization($state, $code, $scope);
 
         $this->response->setStatusCode(302);
-        $this->response->setContent('<html><head><meta http-equiv="refresh" content="10;url=' . $uri . '"/></head><body><a href="' . $uri . '">Click to continue…</a></body></html>');
+        $this->response->setContent('<html><head><meta http-equiv="refresh" content="1;url=' . $uri . '"/></head><body><a href="' . $uri . '">Click to continue…</a></body></html>');
         throw new StopActionException();
     }
 
