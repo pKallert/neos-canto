@@ -12,21 +12,12 @@ privilegeTargets:
     'Flownative.Canto:FinishAuthorization':
       matcher: 'method(Flownative\Canto\Controller\AuthorizationController->finishAction())'
 
-    'Flownative.Canto:ConnectAuthorization':
-      matcher: 'method(Flownative\Canto\Controller\AuthorizationController->connectAction())'
-
 roles:
 
   'Neos.Flow:Everybody':
     privileges:
       -
         privilegeTarget: 'Flownative.Canto:FinishAuthorization'
-        permission: GRANT
-
-  'Neos.Neos:AbstractEditor':
-    privileges:
-      -
-        privilegeTarget: 'Flownative.Canto:ConnectAuthorization'
         permission: GRANT
 
   'Neos.Neos:Administrator':

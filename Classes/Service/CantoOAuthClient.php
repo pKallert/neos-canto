@@ -14,9 +14,10 @@ namespace Flownative\Canto\Service;
  */
 
 use Flownative\Canto\AssetSource\CantoAssetSource;
+use Flownative\Canto\Domain\Model\AccountAuthorization;
+use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
 use Flownative\OAuth2\Client\OAuthClient;
 use Flownative\OAuth2\Client\OAuthClientException;
-use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Http\Helper\UriHelper;
@@ -43,6 +44,12 @@ class CantoOAuthClient extends OAuthClient
      * @var PersistenceManagerInterface
      */
     protected $persistenceManager;
+
+    /**
+     * @Flow\Inject
+     * @var AccountAuthorizationRepository
+     */
+    protected $accountAuthorizationRepository;
 
     public function getServiceType(): string
     {
@@ -121,22 +128,26 @@ class CantoOAuthClient extends OAuthClient
         $authorizationId = $stateFromCache['authorizationId'];
 
         $returnUri = parent::finishAuthorization($stateIdentifier, $code, $scope);
+        $authorization = $this->getAuthorization($authorizationId);
+        if ($authorization === null) {
+            throw new \RuntimeException('Authorization not found', 1631822158);
+        }
+
+        $accountIdentifier = json_decode($authorization->getMetadata(), true, 2, JSON_THROW_ON_ERROR)['accountIdentifier'];
+        $accountAuthorization = $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($accountIdentifier);
+        if ($accountAuthorization === null) {
+            $accountAuthorization = new AccountAuthorization();
+            $accountAuthorization->setFlowAccountIdentifier($accountIdentifier);
+            $this->accountAuthorizationRepository->add($accountAuthorization);
+        } else {
+            $this->accountAuthorizationRepository->update($accountAuthorization);
+        }
+        $accountAuthorization->setAuthorizationId($authorizationId);
+        $this->persistenceManager->allowObject($accountAuthorization);
 
         $queryParameterName = CantoOAuthClient::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
         $queryParameters = UriHelper::parseQueryIntoArguments($returnUri);
         unset($queryParameters[$queryParameterName]);
-        $returnUri = UriHelper::uriWithArguments($returnUri, $queryParameters);
-
-        return new Uri(
-            $this->uriBuilder->uriFor(
-                'connect',
-                [
-                    'authorizationId' => $authorizationId,
-                    'returnUri' => (string)$returnUri
-                ],
-                'Authorization',
-                'Flownative.Canto'
-            )
-        );
+        return UriHelper::uriWithArguments($returnUri, $queryParameters);
     }
 }

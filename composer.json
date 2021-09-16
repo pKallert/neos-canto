@@ -5,11 +5,12 @@
     "license": "MIT",
     "require": {
         "php": "^7.4",
+        "ext-json": "*",
         "neos/flow": "^5.3 || ^6.0 || ^7.0 || dev-master",
         "neos/media": "^4.3 || ^5.0 || ^7.0 || dev-master",
         "guzzlehttp/guzzle": "6.*",
         "behat/transliterator": "~1.0",
-        "flownative/oauth2-client": "^2.1 || ^3.0"
+        "flownative/oauth2-client": "^2.2 || ^3.1"
     },
     "autoload": {
         "psr-4": {
