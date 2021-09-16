@@ -5,16 +5,6 @@ Neos:
         'Flownative.Canto':
           position: 'start'
 
-    security:
-      authentication:
-        providers:
-          'Neos.Neos:Backend':
-            requestPatterns:
-              'Flownative.OCanto:AuthorizationController':
-                pattern: 'ControllerObjectName'
-                patternOptions:
-                  controllerObjectNamePattern: 'Flownative\Canto\Controller\AuthorizationController'
-
   Media:
     assetSources:
       'flownative-canto':
