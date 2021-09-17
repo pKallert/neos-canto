@@ -10,7 +10,7 @@
         "neos/media": "^4.3 || ^5.0 || ^7.0 || dev-master",
         "guzzlehttp/guzzle": "6.*",
         "behat/transliterator": "~1.0",
-        "flownative/oauth2-client": "^2.2 || ^3.1"
+        "flownative/oauth2-client": "^2.2 || ^3.4"
     },
     "autoload": {
         "psr-4": {
