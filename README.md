@@ -32,7 +32,7 @@ $ composer require flownative/neos-canto
 1. In Canto go to Settings > Configuration Options > API 
 2. Click "Create API Key"
 3. Fill in a name that helps you understand what the key is for
-4. Fill in the "Redirect URL", using `http://<www.your-site.com>/oauth2/canto/canto/finishauthorization`,
+4. Fill in the "Redirect URL", using `http://<www.your-site.com>/flownative-canto/authorization/finish`,
    using your own domain(!)
 5. Note down "App ID", "App Secret" and "Website" of the new key
 

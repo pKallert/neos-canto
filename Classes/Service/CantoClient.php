@@ -104,17 +104,22 @@ final class CantoClient
             if ($accountAuthorization instanceof AccountAuthorization) {
                 $this->authorization = $oAuthClient->getAuthorization($accountAuthorization->getAuthorizationId());
             }
-        }
 
-        if ($this->authorization === null || ($this->authorization->getAccessToken() && $this->authorization->getAccessToken()->hasExpired())) {
-            $returnToUri = $this->getCurrentUri();
-            $loginUri = $oAuthClient->startAuthorization(
-                $this->appId,
-                $this->appSecret,
-                $returnToUri,
-                ''
-            );
-            $this->redirectToUri($loginUri);
+            if ($this->authorization === null || ($this->authorization->getAccessToken() && $this->authorization->getAccessToken()->hasExpired())) {
+                $returnToUri = $this->getCurrentUri();
+                $authorizationId = $oAuthClient->generateAuthorizationIdForAuthorizationCodeGrant($this->appId);
+                $loginUri = $oAuthClient->startAuthorizationWithId(
+                    $authorizationId,
+                    $this->appId,
+                    $this->appSecret,
+                    $returnToUri,
+                    ''
+                );
+                $oAuthClient->setAuthorizationMetadata($authorizationId, json_encode(['accountIdentifier' => $account->getAccountIdentifier()], JSON_THROW_ON_ERROR));
+                $this->redirectToUri($loginUri);
+            }
+        } else {
+            throw new \RuntimeException('Security context not initialized', 1631821639);
         }
     }
 

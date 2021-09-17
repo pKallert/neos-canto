@@ -64,7 +64,7 @@ final class CantoOAuthProvider extends GenericProvider
 
     protected function getAuthorizationParameters(array $options): array
     {
-        $parameters =  parent::getAuthorizationParameters($options);
+        $parameters = parent::getAuthorizationParameters($options);
         $parameters['app_id'] = $parameters['client_id'];
         unset($parameters['client_id'], $parameters['approval_prompt']);
 

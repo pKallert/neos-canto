@@ -1,0 +1,11 @@
+#
+# Flownative Canto OAuth Routes
+#
+
+-
+  name: 'Flownative Canto: OAuth'
+  uriPattern: 'flownative-canto/authorization/{@action}'
+  defaults:
+    '@package':    'Flownative.Canto'
+    '@controller': 'Authorization'
+  appendExceedingArguments: true

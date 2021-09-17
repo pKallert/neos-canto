@@ -166,7 +166,7 @@ class CantoAssetSource implements AssetSourceInterface
     }
 
     /**
-     * @return AssetProxyRepositoryInterface
+     * @return CantoAssetProxyRepository
      */
     public function getAssetProxyRepository(): AssetProxyRepositoryInterface
     {

@@ -9,7 +9,16 @@ privilegeTargets:
     'Flownative.Canto:ManageConnection':
       matcher: 'method(Flownative\Canto\Controller\CantoController->indexAction())'
 
+    'Flownative.Canto:FinishAuthorization':
+      matcher: 'method(Flownative\Canto\Controller\AuthorizationController->finishAction())'
+
 roles:
+
+  'Neos.Flow:Everybody':
+    privileges:
+      -
+        privilegeTarget: 'Flownative.Canto:FinishAuthorization'
+        permission: GRANT
 
   'Neos.Neos:Administrator':
     privileges:

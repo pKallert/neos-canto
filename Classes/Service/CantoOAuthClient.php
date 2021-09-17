@@ -18,11 +18,11 @@ use Flownative\Canto\Domain\Model\AccountAuthorization;
 use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
 use Flownative\OAuth2\Client\OAuthClient;
 use Flownative\OAuth2\Client\OAuthClientException;
-use GuzzleHttp\Psr7\Query;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Helper\UriHelper;
+use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Neos\Flow\Security\Account;
 use Neos\Flow\Security\Context;
 use Psr\Http\Message\UriInterface;
 
@@ -100,6 +100,24 @@ class CantoOAuthClient extends OAuthClient
         ]);
     }
 
+    public function renderFinishAuthorizationUri(): string
+    {
+        $currentRequestHandler = $this->bootstrap->getActiveRequestHandler();
+        $httpRequest = $currentRequestHandler->getHttpRequest();
+        $actionRequest = ActionRequest::fromHttpRequest($httpRequest);
+
+        $this->uriBuilder->reset();
+        $this->uriBuilder->setRequest($actionRequest);
+        $this->uriBuilder->setCreateAbsoluteUri(true);
+
+        return $this->uriBuilder->uriFor(
+            'finish',
+            [],
+            'Authorization',
+            'Flownative.Canto'
+        );
+    }
+
     public function finishAuthorization(string $stateIdentifier, string $code, string $scope): UriInterface
     {
         $stateFromCache = $this->stateCache->get($stateIdentifier);
@@ -110,19 +128,12 @@ class CantoOAuthClient extends OAuthClient
         $authorizationId = $stateFromCache['authorizationId'];
 
         $returnUri = parent::finishAuthorization($stateIdentifier, $code, $scope);
-
-        $accountIdentifier = null;
-        if ($this->securityContext->isInitialized()) {
-            $account = $this->securityContext->getAccount();
-            if ($account instanceof Account) {
-                $accountIdentifier = $account->getAccountIdentifier();
-            }
+        $authorization = $this->getAuthorization($authorizationId);
+        if ($authorization === null) {
+            throw new \RuntimeException('Authorization not found', 1631822158);
         }
 
-        if ($accountIdentifier === null) {
-            throw new OAuthClientException(sprintf('OAuth2 (%s): Finishing authorization failed because no account identifier could be retrieved.', $this->getServiceType()), 1627046931);
-        }
-
+        $accountIdentifier = json_decode($authorization->getMetadata(), true, 2, JSON_THROW_ON_ERROR)['accountIdentifier'];
         $accountAuthorization = $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($accountIdentifier);
         if ($accountAuthorization === null) {
             $accountAuthorization = new AccountAuthorization();
@@ -133,13 +144,10 @@ class CantoOAuthClient extends OAuthClient
         }
         $accountAuthorization->setAuthorizationId($authorizationId);
         $this->persistenceManager->allowObject($accountAuthorization);
-        $this->persistenceManager->persistAll();
 
         $queryParameterName = CantoOAuthClient::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
-        $queryParameters = [];
-        parse_str($returnUri->getQuery(), $queryParameters);
+        $queryParameters = UriHelper::parseQueryIntoArguments($returnUri);
         unset($queryParameters[$queryParameterName]);
-
-        return $returnUri->withQuery(Query::build($queryParameters));
+        return UriHelper::uriWithArguments($returnUri, $queryParameters);
     }
 }
