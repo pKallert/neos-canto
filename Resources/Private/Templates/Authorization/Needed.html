@@ -1,0 +1,25 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="Default" />
+
+<f:section name="head">
+    <title>{f:translate(id: 'login.needed.headline', source: 'Main', package: 'Flownative.Canto')}</title>
+    <link rel="stylesheet" href="{f:uri.resource(path: 'Styles/Error.css', package: 'Neos.Neos')}" />
+    <meta http-equiv="refresh" content="5; url={returnUri}"/>
+</f:section>
+
+<f:section name="body">
+    <body class="neos">
+    <div class="neos-error-screen">
+        <div class="neos-message-header">
+            <div class="neos-message-icon">
+                <img src="{f:uri.resource(path: 'resource://Flownative.Canto/Public/Icons/Canto-Logo-White.svg')}" width="70"/>
+            </div>
+            <h1>{f:translate(id: 'login.needed.headline', source: 'Main', package: 'Flownative.Canto')}</h1>
+        </div>
+        <br/>
+        <p>{f:translate(id: 'login.needed.explanation', source: 'Main', package: 'Flownative.Canto')}</p>
+        <p>{f:translate(id: 'login.needed.start', source: 'Main', package: 'Flownative.Canto', arguments: {0: startUri}) -> f:format.raw()}</p>
+        <p>{f:translate(id: 'login.needed.return', source: 'Main', package: 'Flownative.Canto', arguments: {0: returnUri}) -> f:format.raw()}</p>
+    </div>
+    </body>
+</f:section>

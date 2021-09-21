@@ -1,0 +1,7 @@
+-
+  requestFilter: 'isPackage("Flownative.Canto") && isController("Authorization") && isFormat("html")'
+  options:
+    partialRootPaths:
+      - 'resource://Neos.Neos/Private/Partials'
+    layoutRootPaths:
+      - 'resource://Neos.Neos/Private/Layouts'
