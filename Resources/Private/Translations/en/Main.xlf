@@ -8,6 +8,27 @@
             <trans-unit id="cantoConnectionSettings" xml:space="preserve">
                 <source>Canto Connection Settings</source>
             </trans-unit>
+
+            <trans-unit id="login.needed.headline" xml:space="preserve">
+                <source>Canto Login Required</source>
+                <target>Canto Login Required</target>
+            </trans-unit>
+            <trans-unit id="login.needed.explanation" xml:space="preserve">
+                <source>Authentication with Canto is required.</source>
+            </trans-unit>
+            <trans-unit id="login.needed.start" xml:space="preserve">
+                <source><![CDATA[Please click <a href="{0}" target="_blank">Login</a> to start the authorization.]]></source>
+            </trans-unit>
+            <trans-unit id="login.needed.return" xml:space="preserve">
+                <source><![CDATA[After the login, click <a href="{0}">Continue</a> to proceed.]]></source>
+            </trans-unit>
+
+            <trans-unit id="login.finish.headline" xml:space="preserve">
+                <source>Canto Login done</source>
+            </trans-unit>
+            <trans-unit id="login.finish.explanation" xml:space="preserve">
+                <source>Authentication with Canto is done, you can close this window.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

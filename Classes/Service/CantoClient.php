@@ -23,7 +23,9 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Exception\StopActionException;
+use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
 use Psr\Http\Message\RequestInterface;
@@ -60,6 +62,12 @@ final class CantoClient
      * @var Context
      */
     protected $securityContext;
+
+    /**
+     * @Flow\Inject
+     * @var UriBuilder
+     */
+    protected $uriBuilder;
 
     /**
      * @Flow\Inject
@@ -107,16 +115,13 @@ final class CantoClient
 
             if ($this->authorization === null || ($this->authorization->getAccessToken() && $this->authorization->getAccessToken()->hasExpired())) {
                 $returnToUri = $this->getCurrentUri();
-                $authorizationId = $oAuthClient->generateAuthorizationIdForAuthorizationCodeGrant($this->appId);
-                $loginUri = $oAuthClient->startAuthorizationWithId(
-                    $authorizationId,
-                    $this->appId,
-                    $this->appSecret,
-                    $returnToUri,
-                    ''
+                $this->uriBuilder->setRequest(ActionRequest::fromHttpRequest(ServerRequest::fromGlobals()));
+                $this->redirectToUri(
+                    $this->uriBuilder
+                        ->reset()
+                        ->setCreateAbsoluteUri(true)
+                        ->uriFor('needed', ['returnUri' => (string)$returnToUri], 'Authorization', 'Flownative.Canto')
                 );
-                $oAuthClient->setAuthorizationMetadata($authorizationId, json_encode(['accountIdentifier' => $account->getAccountIdentifier()], JSON_THROW_ON_ERROR));
-                $this->redirectToUri($loginUri);
             }
         } else {
             throw new \RuntimeException('Security context not initialized', 1631821639);
@@ -125,14 +130,12 @@ final class CantoClient
 
     private function getCurrentUri(): UriInterface
     {
-        // TODO This needs to be improved!?
         $currentUri = ServerRequest::getUriFromGlobals();
         return $currentUri->withPort(null);
     }
 
-    private function redirectToUri(UriInterface $uri): void
+    private function redirectToUri(string $uri): void
     {
-        // TODO Is there an even better way?
         header('Location: ' . $uri);
         throw new StopActionException('Canto login required', 1625222167);
     }

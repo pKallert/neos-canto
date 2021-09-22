@@ -9,6 +9,9 @@ privilegeTargets:
     'Flownative.Canto:ManageConnection':
       matcher: 'method(Flownative\Canto\Controller\CantoController->indexAction())'
 
+    'Flownative.Canto:StartAuthorization':
+      matcher: 'method(Flownative\Canto\Controller\AuthorizationController->(needed|start)Action())'
+
     'Flownative.Canto:FinishAuthorization':
       matcher: 'method(Flownative\Canto\Controller\AuthorizationController->finishAction())'
 
@@ -18,6 +21,12 @@ roles:
     privileges:
       -
         privilegeTarget: 'Flownative.Canto:FinishAuthorization'
+        permission: GRANT
+
+  'Neos.Neos:AbstractEditor':
+    privileges:
+      -
+        privilegeTarget: 'Flownative.Canto:StartAuthorization'
         permission: GRANT
 
   'Neos.Neos:Administrator':
