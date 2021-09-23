@@ -34,5 +34,5 @@ Neos:
             controller: 'Flownative\Canto\Controller\CantoController'
             label: 'Canto'
             description: 'Flownative.Canto:Main:moduleDescription'
-            icon: 'icon-photo'
+            icon: 'fas fa-photo-video'
             privilegeTarget: 'Flownative.Canto:ManageConnection'
