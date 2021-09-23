@@ -186,9 +186,9 @@ final class CantoClient
             $pathAndQuery .= '&scheme=' . urlencode(implode('|', $formatTypes));
         }
 
-        if (isset($orderings['filename'])) {
+        if (isset($orderings['resource.filename'])) {
             $pathAndQuery .= '&sortBy=name';
-            $pathAndQuery .= '&sortDirection=' . (($orderings['filename'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
+            $pathAndQuery .= '&sortDirection=' . (($orderings['resource.filename'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
 
         if (isset($orderings['lastModified'])) {
