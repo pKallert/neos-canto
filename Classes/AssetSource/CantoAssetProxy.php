@@ -120,7 +120,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $assetProxy->identifier = $jsonObject->scheme . '-' . $jsonObject->id;
         $assetProxy->label = $jsonObject->name;
         $assetProxy->filename = $jsonObject->name;
-        $assetProxy->lastModified = \DateTime::createFromFormat('U', $jsonObject->time);
+        $assetProxy->lastModified = \DateTime::createFromFormat('YmdHisv', $jsonObject->default->{'Date modified'});
         $assetProxy->fileSize = (int)$jsonObject->size;
         $assetProxy->mediaType = MediaTypes::getMediaTypeFromFilename($jsonObject->name);
         $assetProxy->tags = $jsonObject->tag ?? [];
