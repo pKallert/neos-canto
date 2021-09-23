@@ -192,7 +192,7 @@ final class CantoClient
         }
 
         if (isset($orderings['lastModified'])) {
-            $pathAndQuery .= '&sortBy=time';
+            $pathAndQuery .= '&sortBy=last_modified';
             $pathAndQuery .= '&sortDirection=' . (($orderings['lastModified'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
 
