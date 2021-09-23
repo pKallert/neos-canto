@@ -71,8 +71,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      */
     public function getAssetProxy(string $identifier): AssetProxyInterface
     {
-        $cacheEntryIdentifier = $this->getCacheEntryIdentifier($identifier);
-        $cacheEntry = $this->assetProxyCache->get($cacheEntryIdentifier);
+        $cacheEntry = $this->assetProxyCache->get($identifier);
         if ($cacheEntry) {
             $responseObject = \GuzzleHttp\json_decode($cacheEntry);
         } else {
@@ -84,7 +83,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
             throw new AssetNotFoundException('Asset not found', 1526636260);
         }
 
-        $this->assetProxyCache->set($cacheEntryIdentifier, \GuzzleHttp\json_encode($responseObject, JSON_FORCE_OBJECT));
+        $this->assetProxyCache->set($identifier, \GuzzleHttp\json_encode($responseObject, JSON_FORCE_OBJECT));
 
         return CantoAssetProxy::fromJsonObject($responseObject, $this->assetSource);
     }
@@ -168,15 +167,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function orderBy(array $orderings): void
     {
         $this->orderings = $orderings;
-    }
-
-    /**
-     * @param string $cantoIdentifier e.g. image|dh008220hh41h20s1o0mkvmb1l
-     * @return string
-     */
-    public function getCacheEntryIdentifier(string $cantoIdentifier): string
-    {
-        return sha1($cantoIdentifier);
     }
 
     /**

@@ -117,7 +117,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         /** @noinspection PhpUnnecessaryStaticReferenceInspection */
         $assetProxy = new static();
         $assetProxy->assetSource = $assetSource;
-        $assetProxy->identifier = $jsonObject->scheme . '|' . $jsonObject->id;
+        $assetProxy->identifier = $jsonObject->scheme . '-' . $jsonObject->id;
         $assetProxy->label = $jsonObject->name;
         $assetProxy->filename = $jsonObject->name;
         $assetProxy->lastModified = \DateTime::createFromFormat('U', $jsonObject->time);

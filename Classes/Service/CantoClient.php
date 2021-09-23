@@ -147,7 +147,7 @@ final class CantoClient
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
-        [$scheme, $id] = explode('|', $assetProxyId);
+        [$scheme, $id] = explode('-', $assetProxyId);
         return $this->sendAuthenticatedRequest(
             $scheme . '/' . $id,
             'GET',
@@ -236,7 +236,7 @@ final class CantoClient
      */
     public function directUri(string $assetProxyId): ?Uri
     {
-        [$scheme, $id] = explode('|', $assetProxyId);
+        [$scheme, $id] = explode('-', $assetProxyId);
 
         if ($this->authorization === null) {
             $this->authenticate();
