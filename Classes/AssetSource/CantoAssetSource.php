@@ -137,12 +137,18 @@ class CantoAssetSource implements AssetSourceInterface
                     }
                 break;
                 case 'iconPath':
+                    $this->iconPath = (string)$optionValue;
+                break;
                 case 'description':
-                    $this->$optionName = (string)$optionValue;
+                    $this->description = (string)$optionValue;
                 break;
                 default:
                     throw new \InvalidArgumentException(sprintf('Unknown asset source option "%s" specified for Canto asset source "%s". Please check your settings.', $optionName, $assetSourceIdentifier), 1525790910);
             }
+        }
+
+        if ($this->appId === null || $this->appSecret === null) {
+            throw new \InvalidArgumentException(sprintf('No app id or app secret specified for Canto asset source "%s".', $assetSourceIdentifier), 1632468673);
         }
     }
 
