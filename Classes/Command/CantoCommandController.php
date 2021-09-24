@@ -11,8 +11,8 @@ use Flownative\Canto\Exception\MissingClientSecretException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 use Neos\Media\Domain\Model\Asset;
-use Neos\Media\Domain\Model\AssetSource\AssetSourceAwareInterface;
 use Neos\Media\Domain\Repository\AssetRepository;
+use Neos\Media\Domain\Service\AssetSourceService;
 
 class CantoCommandController extends CommandController
 {
@@ -23,10 +23,10 @@ class CantoCommandController extends CommandController
     protected $assetRepository;
 
     /**
-     * @Flow\InjectConfiguration(path="assetSources", package="Neos.Media")
-     * @var array
+     * @Flow\Inject
+     * @var AssetSourceService
      */
-    protected $assetSourcesConfiguration;
+    protected $assetSourceService;
 
     /**
      * Tag used assets
@@ -43,7 +43,7 @@ class CantoCommandController extends CommandController
         !$quiet && $this->outputLine('<b>Tagging used assets of asset source "%s" via Canto API:</b>', [$assetSourceIdentifier]);
 
         try {
-            $cantoAssetSource = new CantoAssetSource($assetSourceIdentifier, $this->assetSourcesConfiguration[$assetSourceIdentifier]['assetSourceOptions']);
+            $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
             $cantoClient = $cantoAssetSource->getCantoClient();
         } catch (MissingClientSecretException $e) {
             $this->outputLine('<error>Authentication error: Missing client secret</error>');

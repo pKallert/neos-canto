@@ -238,6 +238,21 @@ class CantoAssetSource implements AssetSourceInterface
         return $this->description;
     }
 
+    public function getApiBaseUri()
+    {
+        return $this->apiBaseUri;
+    }
+
+    public function getAppId(): string
+    {
+        return $this->appId;
+    }
+
+    public function getAppSecret(): string
+    {
+        return $this->appSecret;
+    }
+
     /**
      * @return CantoClient
      * @throws AuthenticationFailedException

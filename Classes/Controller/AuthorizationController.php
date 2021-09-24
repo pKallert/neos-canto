@@ -20,20 +20,21 @@ use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Security\Context;
+use Neos\Media\Domain\Service\AssetSourceService;
 
 class AuthorizationController extends ActionController
 {
-    /**
-     * @Flow\InjectConfiguration(path="assetSources.flownative-canto.assetSourceOptions", package="Neos.Media")
-     * @var array
-     */
-    protected $assetSourceOptions;
-
     /**
      * @Flow\Inject
      * @var Context
      */
     protected $securityContext;
+
+    /**
+     * @Flow\Inject
+     * @var AssetSourceService
+     */
+    protected $assetSourceService;
 
     public function neededAction(string $returnUri): void
     {
@@ -43,8 +44,8 @@ class AuthorizationController extends ActionController
 
     public function startAction(): void
     {
-        $appId = $this->assetSourceOptions['appId'];
-        $appSecret = $this->assetSourceOptions['appSecret'];
+        $appId = $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]->getAppId();
+        $appSecret = $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]->getAppSecret();
         if ($this->securityContext->isInitialized()) {
             $account = $this->securityContext->getAccount();
             if ($account) {

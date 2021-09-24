@@ -16,15 +16,16 @@ namespace Flownative\Canto\Controller;
 use Flownative\Canto\AssetSource\CantoAssetSource;
 use Flownative\Canto\Exception\AuthenticationFailedException;
 use Neos\Flow\Annotations as Flow;
+use Neos\Media\Domain\Service\AssetSourceService;
 use Neos\Neos\Controller\Module\AbstractModuleController;
 
 class CantoController extends AbstractModuleController
 {
     /**
-     * @Flow\InjectConfiguration(path="assetSources", package="Neos.Media")
-     * @var array
+     * @Flow\Inject
+     * @var AssetSourceService
      */
-    protected $assetSourcesConfiguration;
+    protected $assetSourceService;
 
     /**
      * @return void
@@ -32,11 +33,12 @@ class CantoController extends AbstractModuleController
      */
     public function indexAction(): void
     {
-        $apiBaseUri = $this->assetSourcesConfiguration[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]['assetSourceOptions']['apiBaseUri'];
+        /** @var CantoAssetSource $assetSource */
+        $assetSource = $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER];
+        $apiBaseUri = $assetSource->getApiBaseUri();
         $this->view->assign('apiBaseUri', $apiBaseUri);
 
         try {
-            $assetSource = new CantoAssetSource(CantoAssetSource::ASSET_SOURCE_IDENTIFIER, $this->assetSourcesConfiguration[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]['assetSourceOptions']);
             $client = $assetSource->getCantoClient();
             $this->view->assign('user', $client->user());
 
