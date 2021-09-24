@@ -23,6 +23,8 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Core\Bootstrap;
+use Neos\Flow\Http\HttpRequestHandlerInterface;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\Flow\Mvc\Routing\UriBuilder;
@@ -56,6 +58,12 @@ final class CantoClient
      * @var string
      */
     private $serviceName;
+
+    /**
+     * @Flow\Inject
+     * @var Bootstrap
+     */
+    protected $bootstrap;
 
     /**
      * @Flow\Inject
@@ -130,8 +138,12 @@ final class CantoClient
 
     private function getCurrentUri(): UriInterface
     {
-        $currentUri = ServerRequest::getUriFromGlobals();
-        return $currentUri->withPort(null);
+        $rh = $this->bootstrap->getActiveRequestHandler();
+        if ($rh instanceof HttpRequestHandlerInterface) {
+            return $rh->getHttpRequest()->getUri();
+        }
+
+        throw new \RuntimeException(sprintf('Active request handler (%s) does not implement Neos\Flow\Http\HttpRequestHandlerInterface, could not determine request URI', get_class($rh)), 1632465274);
     }
 
     private function redirectToUri(string $uri): void
