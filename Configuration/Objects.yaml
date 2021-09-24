@@ -1,4 +1,4 @@
-Flownative\Canto\AssetSource\CantoAssetProxyRepository:
+Flownative\Canto\AssetSource\CantoAssetSource:
   properties:
     assetProxyCache:
       object:

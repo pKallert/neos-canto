@@ -16,8 +16,6 @@ namespace Flownative\Canto\AssetSource;
 use Exception;
 use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Neos\Cache\Frontend\StringFrontend;
-use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
 use Neos\Media\Domain\Model\AssetSource\AssetNotFoundExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
@@ -56,11 +54,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     private $orderings = [];
 
     /**
-     * @var StringFrontend
-     */
-    protected $assetProxyCache;
-
-    /**
      * @param string $identifier
      * @return AssetProxyInterface
      * @throws AssetNotFoundExceptionInterface
@@ -71,7 +64,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      */
     public function getAssetProxy(string $identifier): AssetProxyInterface
     {
-        $cacheEntry = $this->assetProxyCache->get($identifier);
+        $cacheEntry = $this->assetSource->getAssetProxyCache()->get($identifier);
         if ($cacheEntry) {
             $responseObject = \GuzzleHttp\json_decode($cacheEntry);
         } else {
@@ -83,7 +76,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
             throw new AssetNotFoundException('Asset not found', 1526636260);
         }
 
-        $this->assetProxyCache->set($identifier, \GuzzleHttp\json_encode($responseObject, JSON_FORCE_OBJECT));
+        $this->assetSource->getAssetProxyCache()->set($identifier, \GuzzleHttp\json_encode($responseObject, JSON_FORCE_OBJECT));
 
         return CantoAssetProxy::fromJsonObject($responseObject, $this->assetSource);
     }
@@ -167,16 +160,5 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function orderBy(array $orderings): void
     {
         $this->orderings = $orderings;
-    }
-
-    /**
-     * @return StringFrontend
-     */
-    public function getAssetProxyCache(): StringFrontend
-    {
-        if ($this->assetProxyCache instanceof DependencyProxy) {
-            $this->assetProxyCache->_activateDependency();
-        }
-        return $this->assetProxyCache;
     }
 }

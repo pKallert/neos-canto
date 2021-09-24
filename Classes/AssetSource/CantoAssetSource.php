@@ -17,7 +17,9 @@ use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\Canto\Service\CantoClient;
 use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Neos\Cache\Frontend\StringFrontend;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyRepositoryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
@@ -87,6 +89,11 @@ class CantoAssetSource implements AssetSourceInterface
      * @var ResourceManager
      */
     protected $resourceManager;
+
+    /**
+     * @var StringFrontend
+     */
+    protected $assetProxyCache;
 
     /**
      * @param string $assetSourceIdentifier
@@ -239,5 +246,13 @@ class CantoAssetSource implements AssetSourceInterface
             );
         }
         return $this->cantoClient;
+    }
+
+    public function getAssetProxyCache(): StringFrontend
+    {
+        if ($this->assetProxyCache instanceof DependencyProxy) {
+            $this->assetProxyCache->_activateDependency();
+        }
+        return $this->assetProxyCache;
     }
 }

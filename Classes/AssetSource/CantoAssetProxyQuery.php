@@ -200,6 +200,10 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         $responseObject = \GuzzleHttp\json_decode($response->getBody());
 
         foreach ($responseObject->results as $rawAsset) {
+            $assetIdentifier = $rawAsset->scheme . '-' . $rawAsset->id;
+
+            $this->assetSource->getAssetProxyCache()->set($assetIdentifier, \GuzzleHttp\json_encode($rawAsset, JSON_FORCE_OBJECT));
+
             $assetProxies[] = CantoAssetProxy::fromJsonObject($rawAsset, $this->assetSource);
         }
         return $assetProxies;

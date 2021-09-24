@@ -60,7 +60,7 @@ class CantoCommandController extends CommandController
 
         $assetProxyRepository = $cantoAssetSource->getAssetProxyRepository();
         assert($assetProxyRepository instanceof CantoAssetProxyRepository);
-        $assetProxyRepository->getAssetProxyCache()->flush();
+        $cantoAssetSource->getAssetProxyCache()->flush();
 
         foreach ($this->assetRepository->iterate($iterator) as $asset) {
             if (!$asset instanceof Asset) {
