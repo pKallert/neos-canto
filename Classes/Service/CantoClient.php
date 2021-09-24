@@ -47,16 +47,6 @@ final class CantoClient
     /**
      * @var string
      */
-    private $appId;
-
-    /**
-     * @var string
-     */
-    private $appSecret;
-
-    /**
-     * @var string
-     */
     private $serviceName;
 
     /**
@@ -95,15 +85,11 @@ final class CantoClient
 
     /**
      * @param string $apiBaseUri
-     * @param string $appId
-     * @param string $appSecret
      * @param string $serviceName
      */
-    public function __construct(string $apiBaseUri, string $appId, string $appSecret, string $serviceName)
+    public function __construct(string $apiBaseUri, string $serviceName)
     {
         $this->apiBaseUri = $apiBaseUri;
-        $this->appId = $appId;
-        $this->appSecret = $appSecret;
         $this->serviceName = $serviceName;
 
         $this->httpClient = new Client(['allow_redirects' => true]);
