@@ -23,12 +23,13 @@ use Neos\Media\Domain\Model\AssetSource\AssetProxyRepositoryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceConnectionExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetTypeFilter;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
+use Neos\Media\Domain\Model\AssetSource\SupportsTaggingInterface;
 use Neos\Media\Domain\Model\Tag;
 
 /**
  * CantoAssetProxyRepository
  */
-class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, SupportsSortingInterface
+class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, SupportsSortingInterface, SupportsTaggingInterface
 {
     /**
      * @var CantoAssetSource
@@ -161,4 +162,27 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     {
         $this->orderings = $orderings;
     }
+
+    public function countUntagged():int 
+    {
+        return 0;
+    }
+
+     /**
+     * Counts Assets with the given Tag assigned
+     *
+     * @param Tag $tag
+     * @param AssetCollection $assetCollection
+     * @return integer
+     */
+    public function countByTag(Tag $tag, AssetCollection $assetCollection = null): int
+    {
+        return 20; 
+        try {
+            return (int)$query->getSingleScalarResult();
+        } catch (NonUniqueResultException $e) {
+            return 0;
+        }
+    }
+    
 }

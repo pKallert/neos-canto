@@ -40,6 +40,11 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @var string
      */
+    private $tag = ''; 
+
+    /**
+     * @var string
+     */
     private $assetTypeFilter = 'All';
 
     /**
@@ -122,6 +127,22 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     public function getSearchTerm(): string
     {
         return $this->searchTerm;
+    }
+
+    /**
+     * @param string $tag
+     */
+    public function setTag(string $tag): void
+    {
+        $this->tag = $tag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTag(): string
+    {
+        return $this->tag;
     }
 
     /**
@@ -221,6 +242,8 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     {
         $searchTerm = $this->searchTerm;
 
+        $tag = $this->tag; 
+
         switch ($this->assetTypeFilter) {
             case 'Image':
                 $formatTypes = ['image'];
@@ -240,6 +263,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
             break;
         }
 
-        return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->offset, $limit, $orderings);
+        return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $tag, $this->offset, $limit, $orderings);
     }
 }
