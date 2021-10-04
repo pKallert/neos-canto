@@ -272,7 +272,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     public function getLocalAssetIdentifier(): ?string
     {
         $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier($this->assetSource->getIdentifier(), $this->identifier);
-        return ($importedAsset instanceof ImportedAsset ? $importedAsset->getLocalAssetIdentifier() : null);
+        return ($importedAsset instanceof ImportedAsset ? $importedAsset->getLocalAssetIdentifier() : '');
     }
 
     /**
