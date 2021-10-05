@@ -173,7 +173,7 @@ final class CantoClient
      * @return ResponseInterface
      * @throws OAuthClientException
      */
-    public function search(string $keyword, array $formatTypes, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
+    public function search(string $keyword, array $formatTypes, string $tag, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
 
@@ -193,6 +193,12 @@ final class CantoClient
             $pathAndQuery .= '&sortBy=last_modified';
             $pathAndQuery .= '&sortDirection=' . (($orderings['lastModified'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
+
+        if(!empty($tag)){
+            $pathAndQuery .= "&meta_multichoice_11.keyword=".$tag; 
+            //var_dump($pathAndQuery);
+        }
+        
 
         return $this->sendAuthenticatedRequest(
             $pathAndQuery,
