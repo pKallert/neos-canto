@@ -23,12 +23,15 @@ use Neos\Media\Domain\Model\AssetSource\AssetProxyRepositoryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceConnectionExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetTypeFilter;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
+use Neos\Media\Domain\Model\AssetSource\SupportsTaggingInterface;
+use Neos\Media\Domain\Model\AssetSource\SupportsCollectionsInterface;
 use Neos\Media\Domain\Model\Tag;
+use Neos\Media\Domain\Model\AssetCollection;
 
 /**
  * CantoAssetProxyRepository
  */
-class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, SupportsSortingInterface
+class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, SupportsSortingInterface, SupportsTaggingInterface, SupportsCollectionsInterface
 {
     /**
      * @var CantoAssetSource
@@ -120,6 +123,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function findByTag(Tag $tag): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
+        $asset_source = $tag->getAssetCollections();
         $query->setSearchTerm($tag->getLabel());
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
@@ -160,5 +164,21 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function orderBy(array $orderings): void
     {
         $this->orderings = $orderings;
+    }
+
+    /**
+     * @return int
+     */
+    public function countUntagged(): int
+    {
+        $query = new CantoAssetProxyQuery($this->assetSource);
+        $query->setAssetTypeFilter($this->assetTypeFilter);
+        $query->setOrderings($this->orderings);
+        return $query->count();  
+    }
+
+    public function filterByCollection(AssetCollection $assetCollection = null): void
+    {
+        $this->activeAssetCollection = $assetCollection;
     }
 }
