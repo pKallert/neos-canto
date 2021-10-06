@@ -296,9 +296,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->tagQuery, $this->offset, $limit, $orderings);
     }
 
-    /**
-     * @todo instead of implementing this whole looping, perhaps just prepare an array in the CantoClient? 
-     * 
+    /** 
      * @return string 
      */
     public function prepareTagQuery(): void 
@@ -326,6 +324,9 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         }
     }
 
+    /**
+     * @return void
+     */
     public function prepareUntaggedQuery(): void 
     {
         $categoryList = $this->assetSource->getCantoClient()->getAllTags(); 

@@ -187,8 +187,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @todo implement the actual asset collection 
-     * 
      * @return void 
      */
     public function filterByCollection(AssetCollection $assetCollection = null): void
