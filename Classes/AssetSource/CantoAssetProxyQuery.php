@@ -20,6 +20,8 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations\Inject;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
+use Neos\Media\Domain\Model\Tag;
+use Neos\Media\Domain\Model\AssetCollection;
 use Psr\Log\LoggerInterface as SystemLoggerInterface;
 
 /**
@@ -38,9 +40,20 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     private $searchTerm = '';
     
     /**
+     * @var Tag
+     */
+    private $tag;
+    
+    /**
      * @var string
      */
-    private $tag = '';
+    private $tagQuery = "";
+
+
+    /**
+     * @var AssetCollection
+     */
+    private $assetCollection; 
 
     /**
      * @var string
@@ -130,19 +143,35 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @param string $tag
+     * @param Tag $tag
      */
-    public function setTag(string $tag): void
+    public function setTag(Tag $tag): void
     {
         $this->tag = $tag;
     }
 
     /**
-     * @return string
+     * @return Tag
      */
-    public function getTag(): string
+    public function getTag(): Tag
     {
         return $this->tag;
+    }
+
+    /**
+     * @param AssetCollection $assetCollection
+     */
+    public function setAssetCollection(AssetCollection $assetCollection = null): void
+    {
+        $this->assetCollection = $assetCollection;
+    }
+
+    /**
+     * @return AssetCollection
+     */
+    public function getAssetCollection(): AssetCollection
+    {
+        return $this->assetCollection;
     }
 
     /**
@@ -240,9 +269,11 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     private function sendSearchRequest(int $limit, array $orderings): Response
     {
+        if (!empty($this->tag)){
+            $this->prepareTagQuery(); 
+        }
+
         $searchTerm = $this->searchTerm;
-        
-        $tag = $this->tag; 
 
         switch ($this->assetTypeFilter) {
             case 'Image':
@@ -262,7 +293,57 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
                 $formatTypes = ['image', 'video', 'audio', 'document', 'presentation', 'other'];
             break;
         }
-
-        return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $tag, $this->offset, $limit, $orderings);
+        return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->tagQuery, $this->offset, $limit, $orderings);
     }
+
+    /**
+     * @todo instead of implementing this whole looping, perhaps just prepare an array in the CantoClient? 
+     * 
+     * @return string 
+     */
+    public function prepareTagQuery(): void 
+    {
+        $categoryList = $this->assetSource->getCantoClient()->getAllTags(); 
+
+        $assetTitles = array(); 
+        if(!empty($this->assetCollection)){
+            $assetTitles[] = $this->assetCollection->getTitle();
+            var_dump($title); 
+        } else {
+            foreach($this->tag->getAssetCollections() as $collection){
+                $assetTitles[] = $collection->getTitle(); 
+            }
+            $title = $this->tag->getAssetCollections()->first()->getTitle(); 
+        }
+        $this->tagQuery = ""; 
+        foreach($categoryList as $cat){
+            foreach($assetTitles as $title){
+                if($cat->name === $title){
+                    $this->tagQuery .= '&'.$cat->id.'.keyword='.$this->tag->getLabel(); 
+                }
+            }
+            
+        }
+    }
+
+    public function prepareUntaggedQuery(): void 
+    {
+        $categoryList = $this->assetSource->getCantoClient()->getAllTags(); 
+        $this->tagQuery = ""; 
+
+        if(!empty($this->assetCollection)){
+            foreach($categoryList as $cat){
+                if($cat->name == $this->assetCollection->getTitle()){
+                    $this->tagQuery .= '&'.$cat->id.'.keyword="__null__"'; 
+                }
+            }
+        } else {
+            foreach($categoryList as $cat){
+                $this->tagQuery .= '&'.$cat->id.'.keyword="__null__"'; 
+            }
+        }
+     
+        
+    }
+
 }

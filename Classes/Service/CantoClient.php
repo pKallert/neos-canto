@@ -30,6 +30,7 @@ use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
+use Neos\Media\Domain\Model\Tag;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -173,8 +174,9 @@ final class CantoClient
      * @return ResponseInterface
      * @throws OAuthClientException
      */
-    public function search(string $keyword, array $formatTypes, string $tag, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
+    public function search(string $keyword, array $formatTypes, string $tagQuery = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
+
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
 
         $pathAndQuery .= '&limit=' . urlencode((string)$limit);
@@ -194,9 +196,8 @@ final class CantoClient
             $pathAndQuery .= '&sortDirection=' . (($orderings['lastModified'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
 
-        if(!empty($tag)){
-            $pathAndQuery .= "&meta_multichoice_11.keyword=".$tag; 
-            //var_dump($pathAndQuery);
+        if(!empty($tagQuery)){
+            $pathAndQuery .= $tagQuery; 
         }
         
 
@@ -207,6 +208,25 @@ final class CantoClient
         );
     }
 
+
+    /**
+     * @todo perhaps cache the request somehow? 
+     * 
+     * @return ResponseInterface
+     * @throws OAuthClientException
+     */
+    public function getAllTags(){
+        $query = "custom/field";
+        $result = $this->sendAuthenticatedRequest(
+            $query,
+            'GET',
+            []
+        );
+
+        return \GuzzleHttp\json_decode($result->getBody());
+    }
+
+  
     /**
      * @return array
      * @throws OAuthClientException

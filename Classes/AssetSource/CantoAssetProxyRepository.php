@@ -38,6 +38,11 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      */
     private $assetSource;
 
+     /**
+     * @var AssetCollection
+     */
+    private $activeAssetCollection;
+
     /**
      * @param CantoAssetSource $assetSource
      */
@@ -123,8 +128,8 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function findByTag(Tag $tag): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
-        $asset_source = $tag->getAssetCollections();
-        $query->setSearchTerm($tag->getLabel());
+        $query->setTag($tag);
+        $query->setAssetCollection($this->activeAssetCollection); 
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
         return new CantoAssetProxyQueryResult($query);
@@ -136,6 +141,8 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function findUntagged(): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
+        $query->setAssetCollection($this->activeAssetCollection); 
+        $query->prepareUntaggedQuery();
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
         return new CantoAssetProxyQueryResult($query);
@@ -172,11 +179,18 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function countUntagged(): int
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
+        $query->setAssetCollection($this->activeAssetCollection); 
+        $query->prepareUntaggedQuery(); 
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
         return $query->count();  
     }
 
+    /**
+     * @todo implement the actual asset collection 
+     * 
+     * @return void 
+     */
     public function filterByCollection(AssetCollection $assetCollection = null): void
     {
         $this->activeAssetCollection = $assetCollection;
