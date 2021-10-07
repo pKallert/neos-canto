@@ -212,19 +212,23 @@ final class CantoClient
     /**
      * @todo perhaps cache the request somehow? 
      * 
-     * @return ResponseInterface
+     * @return array
      * @throws OAuthClientException
      */
-    public function getAllTags(){
+    public function getAllCustomFields(){
         $query = "custom/field";
         $result = $this->sendAuthenticatedRequest(
             $query,
             'GET',
             []
         );
-
-        return \GuzzleHttp\json_decode($result->getBody());
+        if ($response->getStatusCode() === 200) {
+            return \GuzzleHttp\json_decode($result->getBody());
+        }
+        return [];
     }
+
+
 
   
     /**

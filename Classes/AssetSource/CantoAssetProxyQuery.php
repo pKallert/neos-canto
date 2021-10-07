@@ -297,11 +297,11 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /** 
-     * @return string 
+     * @return void 
      */
     public function prepareTagQuery(): void 
     {
-        $categoryList = $this->assetSource->getCantoClient()->getAllTags(); 
+        $categoryList = $this->assetSource->getCantoClient()->getAllCustomFields(); 
 
         $assetTitles = array(); 
         if(!empty($this->assetCollection)){
@@ -328,7 +328,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     public function prepareUntaggedQuery(): void 
     {
-        $categoryList = $this->assetSource->getCantoClient()->getAllTags(); 
+        $categoryList = $this->assetSource->getCantoClient()->getAllCustomFields(); 
         $this->tagQuery = ""; 
 
         if(!empty($this->assetCollection)){
