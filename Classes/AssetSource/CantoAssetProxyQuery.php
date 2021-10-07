@@ -306,12 +306,11 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         $assetTitles = array(); 
         if(!empty($this->assetCollection)){
             $assetTitles[] = $this->assetCollection->getTitle();
-            var_dump($title); 
         } else {
             foreach($this->tag->getAssetCollections() as $collection){
                 $assetTitles[] = $collection->getTitle(); 
             }
-            $title = $this->tag->getAssetCollections()->first()->getTitle(); 
+        
         }
         $this->tagQuery = ""; 
         foreach($categoryList as $cat){
