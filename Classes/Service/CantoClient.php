@@ -222,7 +222,7 @@ final class CantoClient
             'GET',
             []
         );
-        if ($response->getStatusCode() === 200) {
+        if ($result->getStatusCode() === 200) {
             return \GuzzleHttp\json_decode($result->getBody());
         }
         return [];
