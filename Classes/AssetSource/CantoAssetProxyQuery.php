@@ -199,7 +199,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         $response = $this->sendSearchRequest($this->limit, $this->orderings);
         $responseObject = \GuzzleHttp\json_decode($response->getBody());
 
-        if(isset($responseObject->results) && !empty($responseObject->results)){
+        if (isset($responseObject->results) && is_array($responseObject->results)) {
             foreach ($responseObject->results as $rawAsset) {
                 $assetIdentifier = $rawAsset->scheme . '-' . $rawAsset->id;
 
