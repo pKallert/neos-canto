@@ -1,0 +1,5 @@
+Flownative:
+  Canto:
+    commandController: 
+      customFieldsToImportAsCollectionsAndTags: 
+        - Content Type

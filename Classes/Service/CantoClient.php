@@ -31,6 +31,7 @@ use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
 use Neos\Media\Domain\Model\Tag;
+use Neos\Neos\Domain\Model\User;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -99,7 +100,6 @@ final class CantoClient
     private function authenticate(): void
     {
         $oAuthClient = new CantoOAuthClient($this->serviceName);
-
         if ($this->securityContext->isInitialized()) {
             $account = $this->securityContext->getAccount();
             $accountAuthorization = $account ? $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($account->getAccountIdentifier()) : null;
@@ -338,5 +338,31 @@ final class CantoClient
         }
 
         return $this->httpClient->send($this->getAuthenticatedRequest($this->authorization, $uriPathAndQuery, $method, $bodyFields));
+    }
+
+    /**
+     * Authorize a single user 
+     * requires the user to have authenticated via the backend before
+     * 
+     * @param User $user 
+     * @return void 
+     */
+    public function setAuthorizationByUser(User $user): void 
+    {
+        $oAuthClient = new CantoOAuthClient($this->serviceName);
+
+        $authorization = null; 
+        foreach ($user->getAccounts() as $account) {
+            $accountAuthorization = $account ? $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($account->getAccountIdentifier()) : null;
+
+            if ($accountAuthorization instanceof AccountAuthorization) {
+                $authorization = $oAuthClient->getAuthorization($accountAuthorization->getAuthorizationId());
+            }
+        }
+        if ($authorization === null || ($authorization->getAccessToken() && $authorization->getAccessToken()->hasExpired())) {
+            throw new \RuntimeException('Authorization could not be set', 1631821638);
+        }
+
+        $this->authorization = $authorization; 
     }
 }

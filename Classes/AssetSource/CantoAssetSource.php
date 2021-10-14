@@ -32,7 +32,7 @@ class CantoAssetSource implements AssetSourceInterface
     /**
      * @var bool
      */
-    private $autoTaggingEnabled = false;
+    private $autoTaggingEnabled = true;
 
     /**
      * @var string
