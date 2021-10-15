@@ -318,7 +318,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         foreach($categoryList as $cat){
             foreach($assetTitles as $title){
                 if($cat->name === $title){
-                    $this->tagQuery .= '&'.$cat->id.'.keyword='.$this->tag->getLabel(); 
+                    $this->tagQuery .= '&'.$cat->id.'.keyword="'.$this->tag->getLabel().'"'; 
                 }
             }
             
