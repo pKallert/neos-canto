@@ -360,7 +360,7 @@ final class CantoClient
             }
         }
         if ($authorization === null || ($authorization->getAccessToken() && $authorization->getAccessToken()->hasExpired())) {
-            throw new \RuntimeException('Authorization could not be set', 1631821638);
+            throw new \Exception('Authorization could not be set', 1631821638);
         }
 
         $this->authorization = $authorization; 

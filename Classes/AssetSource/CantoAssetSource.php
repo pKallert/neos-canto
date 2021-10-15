@@ -32,7 +32,7 @@ class CantoAssetSource implements AssetSourceInterface
     /**
      * @var bool
      */
-    private $autoTaggingEnabled = true;
+    private $autoTaggingEnabled = false;
 
     /**
      * @var string
@@ -195,7 +195,7 @@ class CantoAssetSource implements AssetSourceInterface
      */
     public function isReadOnly(): bool
     {
-        return true;
+        return false;
     }
 
     /**

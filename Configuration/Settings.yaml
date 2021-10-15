@@ -1,3 +1,8 @@
+Flownative:
+  Canto:
+    commandController: 
+      customFieldsToImportAsCollectionsAndTags: {}
+
 Neos:
   Flow:
     mvc:
