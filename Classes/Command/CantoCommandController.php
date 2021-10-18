@@ -133,7 +133,7 @@ class CantoCommandController extends CommandController
                 if ($currentTags !== $newTags) {
                     $cantoClient->updateFile($assetProxy->getIdentifier(), ['keywords' => implode(',', $newTags)]);
                     $this->outputLine('   removed %s', [$asset->getLabel(), $asset->getUsageCount()]);
-                  } else {
+                } else {
                     $this->outputLine('  (removed) %s', [$asset->getLabel(), $asset->getUsageCount()]);
                 }
             }
@@ -143,6 +143,7 @@ class CantoCommandController extends CommandController
     /**
      * Import Canto Custom Fields as Tags and Collections
      *
+     * @param string $username Name of the user that is used to authenticate in Canto
      * @param string $assetSource Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
@@ -166,7 +167,7 @@ class CantoCommandController extends CommandController
 
         $user = $this->userService->getUser($username); 
         if (!$user instanceof User) {
-            $this->outputLine('The user "%s" does not exist.', [$username]);
+            $this->outputLine('<error>The user "%s" does not exist.</error>', [$username]);
             $this->quit(1);
         }
 
