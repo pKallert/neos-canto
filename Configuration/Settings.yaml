@@ -1,3 +1,12 @@
+Flownative:
+  Canto:
+    mapping:
+      customFields:
+        'meta_multichoice_0':
+          asAssetCollection: true
+          valuesAsTags: false
+          incluede: []
+          exclude: []
 Neos:
   Flow:
     mvc:

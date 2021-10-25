@@ -18,6 +18,7 @@ use Flownative\Canto\Exception\ConnectionException;
 use GuzzleHttp\Psr7\Response;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations\Inject;
+use Neos\Flow\Annotations as Flow;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
 use Neos\Media\Domain\Model\Tag;
@@ -49,6 +50,11 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     private $tagQuery = "";
 
+    /**
+     * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
+     * @var array
+     */
+    protected $mapping;
 
     /**
      * @var AssetCollection
@@ -303,25 +309,29 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     public function prepareTagQuery(): void 
     {
-        $categoryList = $this->assetSource->getCantoClient()->getAllCustomFields(); 
-
-        $assetTitles = array(); 
+        $assetCollectionTitlesToSearch = array();
         if(!empty($this->assetCollection)){
-            $assetTitles[] = $this->assetCollection->getTitle();
+            $assetCollectionTitlesToSearch[] = $this->assetCollection->getTitle();
         } else {
             foreach($this->tag->getAssetCollections() as $collection){
-                $assetTitles[] = $collection->getTitle(); 
+                $assetCollectionTitlesToSearch[] = $collection->getTitle();
             }
-        
         }
-        $this->tagQuery = ""; 
-        foreach($categoryList as $cat){
-            foreach($assetTitles as $title){
-                if($cat->name === $title){
-                    $this->tagQuery .= '&'.$cat->id.'.keyword="'.$this->tag->getLabel().'"'; 
+
+        $this->tagQuery = "";
+
+        if(!empty($this->mapping['customFields'])){
+            $allCantoCustomFields = $this->assetSource->getCantoClient()->getAllCustomFields();
+
+            foreach($allCantoCustomFields as $cantoCustomField){
+                //field should not be mapped if it does not exist in the settings or if asAssetCollection is set to false
+                if(!array_key_exists($cantoCustomField->id, $this->mapping['customFields']) || !$this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection'] ){
+                    continue;
+                }
+                if(in_array($cantoCustomField->name, $assetCollectionTitlesToSearch)){
+                    $this->tagQuery .= '&'.$cantoCustomField->id.'.keyword="'.$this->tag->getLabel().'"';
                 }
             }
-            
         }
     }
 
@@ -330,18 +340,23 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     public function prepareUntaggedQuery(): void 
     {
-        $categoryList = $this->assetSource->getCantoClient()->getAllCustomFields(); 
-        $this->tagQuery = ""; 
 
-        if(!empty($this->assetCollection)){
-            foreach($categoryList as $cat){
-                if($cat->name == $this->assetCollection->getTitle()){
-                    $this->tagQuery .= '&'.$cat->id.'.keyword="__null__"'; 
+        $this->tagQuery = "";
+        if(!empty($this->mapping['customFields'])) {
+            if (!empty($this->assetCollection)) {
+                $allCantoCustomFields = $this->assetSource->getCantoClient()->getAllCustomFields();
+                foreach ($allCantoCustomFields as $cantoCustomField) {
+                    if ($cantoCustomField->name == $this->assetCollection->getTitle() && $this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection']) {
+                        $this->tagQuery .= '&' . $cantoCustomField->id . '.keyword="__null__"';
+                    }
                 }
-            }
-        } else {
-            foreach($categoryList as $cat){
-                $this->tagQuery .= '&'.$cat->id.'.keyword="__null__"'; 
+            } else {
+                foreach ($this->mapping['customFields'] as $customFieldId => $customFieldToBeMapped) {
+                    if(!$customFieldToBeMapped['asAssetCollection']){
+                        continue;
+                    }
+                    $this->tagQuery .= '&' . $customFieldId . '.keyword="__null__"';
+                }
             }
         }
      
