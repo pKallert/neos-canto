@@ -14,14 +14,15 @@ namespace Flownative\Canto\AssetSource;
  */
 
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Flownative\Canto\Exception\ConnectionException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use Neos\Flow\Annotations\Inject;
+use Neos\Flow\Annotations as Flow;
+use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
 use Neos\Media\Domain\Model\Tag;
-use Neos\Media\Domain\Model\AssetCollection;
 use Psr\Log\LoggerInterface as SystemLoggerInterface;
 
 /**
@@ -38,22 +39,21 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @var string
      */
     private $searchTerm = '';
-    
+
     /**
      * @var Tag
      */
-    private $tag;
-    
+    private $activeTag;
+
     /**
      * @var string
      */
     private $tagQuery = "";
 
-
     /**
      * @var AssetCollection
      */
-    private $assetCollection; 
+    private $activeAssetCollection;
 
     /**
      * @var string
@@ -76,12 +76,13 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     private $limit = 30;
 
     /**
-     * @var string
+     * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
+     * @var array
      */
-    private $parentFolderIdentifier = '';
+    protected $mapping = [];
 
     /**
-     * @Inject
+     * @Flow\Inject
      * @var SystemLoggerInterface
      */
     protected $logger;
@@ -145,33 +146,33 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @param Tag $tag
      */
-    public function setTag(Tag $tag): void
+    public function setActiveTag(Tag $tag): void
     {
-        $this->tag = $tag;
+        $this->activeTag = $tag;
     }
 
     /**
      * @return Tag
      */
-    public function getTag(): Tag
+    public function getActiveTag(): Tag
     {
-        return $this->tag;
+        return $this->activeTag;
     }
 
     /**
-     * @param AssetCollection $assetCollection
+     * @param AssetCollection|null $assetCollection
      */
-    public function setAssetCollection(AssetCollection $assetCollection = null): void
+    public function setActiveAssetCollection(AssetCollection $assetCollection = null): void
     {
-        $this->assetCollection = $assetCollection;
+        $this->activeAssetCollection = $assetCollection;
     }
 
     /**
-     * @return AssetCollection
+     * @return AssetCollection|null
      */
-    public function getAssetCollection(): AssetCollection
+    public function getActiveAssetCollection(): ?AssetCollection
     {
-        return $this->assetCollection;
+        return $this->activeAssetCollection;
     }
 
     /**
@@ -207,22 +208,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @return string
-     */
-    public function getParentFolderIdentifier(): string
-    {
-        return $this->parentFolderIdentifier;
-    }
-
-    /**
-     * @param string $parentFolderIdentifier
-     */
-    public function setParentFolderIdentifier(string $parentFolderIdentifier): void
-    {
-        $this->parentFolderIdentifier = $parentFolderIdentifier;
-    }
-
-    /**
      * @return AssetProxyQueryResultInterface
      */
     public function execute(): AssetProxyQueryResultInterface
@@ -232,6 +217,10 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
     /**
      * @return int
+     * @throws AuthenticationFailedException
+     * @throws IdentityProviderException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function count(): int
     {
@@ -242,6 +231,12 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
     /**
      * @return CantoAssetProxy[]
+     * @throws AuthenticationFailedException
+     * @throws IdentityProviderException
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws \Neos\Cache\Exception
+     * @throws \Neos\Cache\Exception\InvalidDataException
      */
     public function getArrayResult(): array
     {
@@ -266,13 +261,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @param array $orderings
      * @return Response
      * @throws AuthenticationFailedException
-     * @throws ConnectionException
      * @throws IdentityProviderException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
     private function sendSearchRequest(int $limit, array $orderings): Response
     {
-        if (!empty($this->tag)){
-            $this->prepareTagQuery(); 
+        if (!empty($this->activeTag)) {
+            $this->prepareTagQuery();
         }
 
         $searchTerm = $this->searchTerm;
@@ -298,54 +294,67 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->tagQuery, $this->offset, $limit, $orderings);
     }
 
-    /** 
-     * @return void 
+    /**
+     * @return void
+     * @throws AuthenticationFailedException
+     * @throws IdentityProviderException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
-    public function prepareTagQuery(): void 
+    public function prepareTagQuery(): void
     {
-        $categoryList = $this->assetSource->getCantoClient()->getAllCustomFields(); 
-
-        $assetTitles = array(); 
-        if(!empty($this->assetCollection)){
-            $assetTitles[] = $this->assetCollection->getTitle();
+        $assetCollectionTitlesToSearch = [];
+        if (!empty($this->activeAssetCollection)) {
+            $assetCollectionTitlesToSearch[] = $this->activeAssetCollection->getTitle();
         } else {
-            foreach($this->tag->getAssetCollections() as $collection){
-                $assetTitles[] = $collection->getTitle(); 
+            foreach ($this->activeTag->getAssetCollections() as $collection) {
+                $assetCollectionTitlesToSearch[] = $collection->getTitle();
             }
-        
         }
-        $this->tagQuery = ""; 
-        foreach($categoryList as $cat){
-            foreach($assetTitles as $title){
-                if($cat->name === $title){
-                    $this->tagQuery .= '&'.$cat->id.'.keyword='.$this->tag->getLabel(); 
+
+        $this->tagQuery = '';
+
+        if (!empty($this->mapping['customFields'])) {
+            $cantoCustomFields = $this->assetSource->getCantoClient()->getCustomFields();
+
+            foreach ($cantoCustomFields as $cantoCustomField) {
+                // field should not be mapped if it does not exist in the settings or if asAssetCollection is set to false
+                if (!array_key_exists($cantoCustomField->id, $this->mapping['customFields']) || !$this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection']) {
+                    continue;
+                }
+                if (in_array($cantoCustomField->name, $assetCollectionTitlesToSearch, true)) {
+                    $this->tagQuery .= '&' . $cantoCustomField->id . '.keyword="' . $this->activeTag->getLabel() . '"';
                 }
             }
-            
         }
     }
 
     /**
      * @return void
+     * @throws AuthenticationFailedException
+     * @throws IdentityProviderException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
-    public function prepareUntaggedQuery(): void 
+    public function prepareUntaggedQuery(): void
     {
-        $categoryList = $this->assetSource->getCantoClient()->getAllCustomFields(); 
-        $this->tagQuery = ""; 
-
-        if(!empty($this->assetCollection)){
-            foreach($categoryList as $cat){
-                if($cat->name == $this->assetCollection->getTitle()){
-                    $this->tagQuery .= '&'.$cat->id.'.keyword="__null__"'; 
+        $this->tagQuery = '';
+        if (!empty($this->mapping['customFields'])) {
+            if ($this->activeAssetCollection !== null) {
+                $cantoCustomFields = $this->assetSource->getCantoClient()->getCustomFields();
+                foreach ($cantoCustomFields as $cantoCustomField) {
+                    if ($this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection'] && $cantoCustomField->name === $this->activeAssetCollection->getTitle()) {
+                        $this->tagQuery .= '&' . $cantoCustomField->id . '.keyword="__null__"';
+                    }
+                }
+            } else {
+                foreach ($this->mapping['customFields'] as $customFieldId => $customFieldToBeMapped) {
+                    if (!$customFieldToBeMapped['asAssetCollection']) {
+                        continue;
+                    }
+                    $this->tagQuery .= '&' . $customFieldId . '.keyword="__null__"';
                 }
             }
-        } else {
-            foreach($categoryList as $cat){
-                $this->tagQuery .= '&'.$cat->id.'.keyword="__null__"'; 
-            }
         }
-     
-        
     }
-
 }

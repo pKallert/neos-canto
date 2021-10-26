@@ -1,8 +1,8 @@
 Flownative:
   Canto:
-    commandController: 
-      customFieldsToImportAsCollectionsAndTags: {}
-
+    mapping:
+      # map "Custom Fields" from Canto to Neos
+      customFields: []
 Neos:
   Flow:
     mvc:
