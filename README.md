@@ -16,6 +16,7 @@ software makes working with pictures, graphics and video files easier.
 
 - seamless integration into the Neos media browser
 - automatic import and clean up of media assets from Canto
+- mapping of metadata from Canto to Neos
 
 ## Installation
 
@@ -27,7 +28,7 @@ the dependencies of your Flow or Neos distribution:
 $ composer require flownative/neos-canto
 ```
 
-## Enabling Canto API access
+### Enabling Canto API access
 
 1. In Canto go to Settings > Configuration Options > API > API Keys
 2. Click "Create API Key"
@@ -45,7 +46,7 @@ mode must be enabled.
 2. Edit the API key you use for the Neos integration
 3. Enable "Support Client Credentials Mode" and click "Save"
 
-## Configure the Canto connection
+### Configure the Canto connection
 
 You need to set the "App ID" and "App Secret" from the generated API key as well
 as the URLs you are using to access Canto (since they depend on your setup.)
@@ -91,7 +92,48 @@ one called "Canto". If you switch to the Canto asset source and are not yet
 and asked to authorize access for Neos. After a redirect back to Neos you
 can now browse/search Canto and use assets from it in Neos as usual.
 
-## Cleaning up unused assets
+### Custom Field mapping from Canto to Neos
+
+Canto offers "custom fields" to add arbitrary data to assets. Those can be
+mapped to asset collections and tags in Neos, to make them visible for the
+users.
+
+The configuration for this looks like that:
+
+```yaml
+Flownative:
+  Canto:
+    mapping:
+      # map "Custom Fields" from Canto to Neos
+      customFields:
+        # Foo Bar Baz                    # the name in Canto, for readbility
+        'meta_multichoice_0':            # the custom field id in Canto
+          asAssetCollection: false       # map to an asset collection named after the field
+          valuesAsTags: false            # map field values to Neos tags; if true
+                                         # an asset is assigned a tag corresponding to 
+                                         # the value
+          include: []                    # only include the listed field values as tags
+          exclude: []                    # exclude the listed field values as tags
+```
+
+- The key used is the custom field identifier from Canto (not the name!)
+- `asAssetCollection` set to `true` exposes the custom field as an asset
+  collection named like the custom field.
+- If `valuesAsTags` is set to `true`, each distinct value of the custom field
+  is exposed as a tag in the asset collection and assets are grouped below the
+  tag whose value they are assigned on the Canto side.
+- With `include` you can specify which values to consider, if this is used, only
+  those will be exposed on the Neos side.
+- If only a few values should be excluded, `exclude` can be used. All values are
+  exposed in Neos, except those listed here.
+
+**Note:** Right now ths feature only makes sense if both `asAssetCollection` and
+`valuesAsTags` are set to `true`.
+
+**Note:** The asset collections and tags must be created manually on the Neos
+side (for now.)
+
+### Cleaning up unused assets
 
 Whenever a Canto asset is used in Neos, the media file will be copied
 automatically to the internal Neos asset storage. As long as this media

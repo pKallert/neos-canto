@@ -19,6 +19,7 @@ use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -164,38 +165,37 @@ final class CantoClient
      * @param string $assetProxyId
      * @return ResponseInterface
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
         [$scheme, $id] = explode('-', $assetProxyId);
-        return $this->sendAuthenticatedRequest(
-            $scheme . '/' . $id,
-            'GET',
-            []
-        );
+        return $this->sendAuthenticatedRequest($scheme . '/' . $id);
     }
 
     /**
      * @param string $id
      * @param array $metadata
      * @return ResponseInterface
+     * @TODO Implement updateFile() method.
      */
     public function updateFile(string $id, array $metadata): ResponseInterface
     {
-        // TODO: Implement updateFile() method.
         throw new \RuntimeException('not implemented');
     }
 
     /**
      * @param string $keyword
      * @param array $formatTypes
+     * @param string $customQueryPart
      * @param int $offset
      * @param int $limit
      * @param array $orderings
      * @return ResponseInterface
+     * @throws GuzzleException
      * @throws OAuthClientException
      */
-    public function search(string $keyword, array $formatTypes, int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
+    public function search(string $keyword, array $formatTypes, string $customQueryPart = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
 
@@ -216,16 +216,32 @@ final class CantoClient
             $pathAndQuery .= '&sortDirection=' . (($orderings['lastModified'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
 
-        return $this->sendAuthenticatedRequest(
-            $pathAndQuery,
-            'GET',
-            []
-        );
+        if (!empty($customQueryPart)) {
+            $pathAndQuery .= '&' . $customQueryPart;
+        }
+
+        return $this->sendAuthenticatedRequest($pathAndQuery);
     }
 
     /**
      * @return array
      * @throws OAuthClientException
+     * @throws GuzzleException
+     * @todo perhaps cache the result
+     */
+    public function getCustomFields(): array
+    {
+        $response = $this->sendAuthenticatedRequest('custom/field');
+        if ($response->getStatusCode() === 200) {
+            return \GuzzleHttp\json_decode($response->getBody()->getContents());
+        }
+        return [];
+    }
+
+    /**
+     * @return array
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function user(): array
     {
@@ -239,6 +255,7 @@ final class CantoClient
     /**
      * @return array
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function tree(): array
     {
@@ -253,6 +270,7 @@ final class CantoClient
      * @param string $assetProxyId
      * @return Uri|null
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function directUri(string $assetProxyId): ?Uri
     {
@@ -322,6 +340,7 @@ final class CantoClient
      * @param array $bodyFields
      * @return Response
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
     {
