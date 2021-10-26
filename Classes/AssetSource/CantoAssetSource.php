@@ -263,6 +263,8 @@ class CantoAssetSource implements AssetSourceInterface
         if ($this->cantoClient === null) {
             $this->cantoClient = new CantoClient(
                 $this->apiBaseUri,
+                $this->appId,
+                $this->appSecret,
                 $this->assetSourceIdentifier
             );
         }
