@@ -14,6 +14,9 @@ namespace Flownative\Canto\AssetSource;
  */
 
 use Exception;
+use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
@@ -252,6 +255,9 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
 
     /**
      * @return resource
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function getImportStream()
     {
@@ -260,6 +266,9 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
 
     /**
      * @return UriInterface
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function getOriginalUri(): UriInterface
     {

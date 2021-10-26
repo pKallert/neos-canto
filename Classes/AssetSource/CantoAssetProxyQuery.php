@@ -17,7 +17,8 @@ use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Neos\Cache\Exception as CacheException;
+use Neos\Cache\Exception\InvalidDataException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
@@ -217,10 +218,9 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
     /**
      * @return int
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
      * @throws OAuthClientException
      * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function count(): int
     {
@@ -231,12 +231,11 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
     /**
      * @return CantoAssetProxy[]
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
      * @throws OAuthClientException
      * @throws GuzzleException
-     * @throws \Neos\Cache\Exception
-     * @throws \Neos\Cache\Exception\InvalidDataException
+     * @throws CacheException
+     * @throws InvalidDataException
+     * @throws AuthenticationFailedException
      */
     public function getArrayResult(): array
     {
@@ -262,6 +261,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @return Response
      * @throws OAuthClientException
      * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     private function sendSearchRequest(int $limit, array $orderings): Response
     {
@@ -296,6 +296,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @return void
      * @throws OAuthClientException
      * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function prepareTagQuery(): void
     {
@@ -329,6 +330,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @return void
      * @throws OAuthClientException
      * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function prepareUntaggedQuery(): void
     {

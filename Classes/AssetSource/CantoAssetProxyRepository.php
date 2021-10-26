@@ -13,15 +13,16 @@ namespace Flownative\Canto\AssetSource;
  * source code.
  */
 
-use Exception;
 use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
+use Neos\Cache\Exception as CacheException;
+use Neos\Cache\Exception\InvalidDataException;
 use Neos\Media\Domain\Model\AssetCollection;
-use Neos\Media\Domain\Model\AssetSource\AssetNotFoundExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyRepositoryInterface;
-use Neos\Media\Domain\Model\AssetSource\AssetSourceConnectionExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetTypeFilter;
 use Neos\Media\Domain\Model\AssetSource\SupportsCollectionsInterface;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
@@ -64,10 +65,13 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     /**
      * @param string $identifier
      * @return AssetProxyInterface
-     * @throws AssetNotFoundExceptionInterface
-     * @throws AssetSourceConnectionExceptionInterface
      * @throws AssetNotFoundException
-     * @throws Exception
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws CacheException
+     * @throws InvalidDataException
+     * @throws AuthenticationFailedException
+     * @throws \Exception
      */
     public function getAssetProxy(string $identifier): AssetProxyInterface
     {
@@ -89,7 +93,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @param AssetTypeFilter $assetType
+     * @param AssetTypeFilter|null $assetType
      */
     public function filterByType(AssetTypeFilter $assetType = null): void
     {
@@ -136,6 +140,9 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
 
     /**
      * @return AssetProxyQueryResultInterface
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function findUntagged(): AssetProxyQueryResultInterface
     {
@@ -149,6 +156,9 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
 
     /**
      * @return int
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function countAll(): int
     {
@@ -174,6 +184,9 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
 
     /**
      * @return int
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function countUntagged(): int
     {

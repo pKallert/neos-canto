@@ -32,7 +32,6 @@ use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
-use Neos\Neos\Domain\Model\User;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -164,8 +163,9 @@ final class CantoClient
     /**
      * @param string $assetProxyId
      * @return ResponseInterface
-     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws OAuthClientException
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
@@ -192,6 +192,7 @@ final class CantoClient
      * @param int $limit
      * @param array $orderings
      * @return ResponseInterface
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws OAuthClientException
      */
@@ -225,8 +226,9 @@ final class CantoClient
 
     /**
      * @return array
-     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws OAuthClientException
      * @todo perhaps cache the result
      */
     public function getCustomFields(): array
@@ -240,8 +242,9 @@ final class CantoClient
 
     /**
      * @return array
-     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws OAuthClientException
      */
     public function user(): array
     {
@@ -254,8 +257,9 @@ final class CantoClient
 
     /**
      * @return array
-     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws OAuthClientException
      */
     public function tree(): array
     {
@@ -269,8 +273,9 @@ final class CantoClient
     /**
      * @param string $assetProxyId
      * @return Uri|null
-     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws OAuthClientException
      */
     public function directUri(string $assetProxyId): ?Uri
     {
@@ -339,8 +344,9 @@ final class CantoClient
      * @param string $method
      * @param array $bodyFields
      * @return Response
-     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws OAuthClientException
      */
     public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
     {

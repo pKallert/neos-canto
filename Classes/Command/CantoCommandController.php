@@ -13,6 +13,7 @@ use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
+use Neos\Flow\Cli\Exception\StopCommandException;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Media\Domain\Model\Asset;
 use Neos\Media\Domain\Model\AssetCollection;
@@ -60,6 +61,7 @@ class CantoCommandController extends CommandController
      * @param string $assetSource Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
+     * @throws StopCommandException
      */
     public function tagUsedAssetsCommand(string $assetSource = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = false): void
     {
@@ -143,9 +145,11 @@ class CantoCommandController extends CommandController
      * @param string $assetSourceIdentifier Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
-     * @throws OAuthClientException
      * @throws GuzzleException
      * @throws IllegalObjectTypeException
+     * @throws OAuthClientException
+     * @throws StopCommandException
+     * @throws AuthenticationFailedException
      */
     public function importCustomFieldsAsCollectionsAndTagsCommand(string $assetSourceIdentifier = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = true): void
     {
