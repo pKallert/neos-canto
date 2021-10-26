@@ -337,7 +337,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
             if ($this->activeAssetCollection !== null) {
                 $cantoCustomFields = $this->assetSource->getCantoClient()->getCustomFields();
                 foreach ($cantoCustomFields as $cantoCustomField) {
-                    if ($this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection'] && $cantoCustomField->name === $this->activeAssetCollection->getTitle()) {
+                    if (array_key_exists($cantoCustomField->id, $this->mapping['customFields']) && $this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection'] && $cantoCustomField->name === $this->activeAssetCollection->getTitle()) {
                         $this->tagQuery .= '&' . $cantoCustomField->id . '.keyword="__null__"';
                     }
                 }
