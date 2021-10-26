@@ -190,11 +190,10 @@ class CantoAssetSource implements AssetSourceInterface
 
     /**
      * @return bool
-     * @todo Change back to true, because we do not write to Canto!
      */
     public function isReadOnly(): bool
     {
-        return false;
+        return true;
     }
 
     /**
