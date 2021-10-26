@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Flownative\Canto\Command;
 
 use Flownative\Canto\AssetSource\CantoAssetProxy;
@@ -8,15 +9,18 @@ use Flownative\Canto\AssetSource\CantoAssetSource;
 use Flownative\Canto\Exception\AccessToAssetDeniedException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\Canto\Exception\MissingClientSecretException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
+use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Media\Domain\Model\Asset;
-use Neos\Media\Domain\Repository\AssetRepository;
-use Neos\Media\Domain\Repository\AssetCollectionRepository;
-use Neos\Media\Domain\Repository\TagRepository;
-use Neos\Media\Domain\Service\AssetSourceService;
 use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\Tag;
+use Neos\Media\Domain\Repository\AssetCollectionRepository;
+use Neos\Media\Domain\Repository\AssetRepository;
+use Neos\Media\Domain\Repository\TagRepository;
+use Neos\Media\Domain\Service\AssetSourceService;
 
 class CantoCommandController extends CommandController
 {
@@ -33,12 +37,6 @@ class CantoCommandController extends CommandController
     protected $assetSourceService;
 
     /**
-     * @Flow\InjectConfiguration(path="commandController.customFieldsToImportAsCollectionsAndTags", package="Flownative.Canto")
-     * @var array
-     */
-    protected $customFieldsToImportAsCollectionsAndTags;
-
-    /**
      * @Flow\Inject
      * @var TagRepository
      */
@@ -49,6 +47,12 @@ class CantoCommandController extends CommandController
      * @var AssetCollectionRepository
      */
     protected $assetCollectionRepository;
+
+    /**
+     * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
+     * @var array
+     */
+    protected $mapping = [];
 
     /**
      * Tag used assets
@@ -138,10 +142,19 @@ class CantoCommandController extends CommandController
      * @param string $assetSourceIdentifier Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws IllegalObjectTypeException
      */
     public function importCustomFieldsAsCollectionsAndTagsCommand(string $assetSourceIdentifier = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = true): void
     {
-        !$quiet && $this->outputLine('<b>Importing custom Fields as Tags and Collections via Canto API:</b>');
+        !$quiet && $this->outputLine('<b>Importing custom fields as tags and asset collections via Canto API</b>');
+
+        $customFieldsMapping = $this->mapping['customFields'];
+        if (empty($customFieldsMapping)) {
+            $this->outputLine('<error>No custom fields configured for mapping</error>');
+            $this->quit(1);
+        }
 
         try {
             /** @var CantoAssetSource $cantoAssetSource */
@@ -149,51 +162,54 @@ class CantoCommandController extends CommandController
             $cantoClient = $cantoAssetSource->getCantoClient();
             $cantoClient->allowClientCredentialsAuthentication(true);
         } catch (\Exception $e) {
-            $this->outputLine('<error>Canto Client error: Client could not be created</error>');
-            exit(1);
-        } 
-
-        if (empty($this->customFieldsToImportAsCollectionsAndTags)) {
-            $this->outputLine('<error>Configuration error: No Tags set to be imported</error>');
-            exit(1);
+            $this->outputLine('<error>Canto client could not be created</error>');
+            $this->quit(1);
         }
 
-        $cantoCustomFields = $cantoClient->getAllCustomFields();
+        $cantoCustomFields = $cantoClient->getCustomFields();
+        foreach ($cantoCustomFields as $cantoCustomField) {
+            if (array_key_exists($cantoCustomField->id, $customFieldsMapping) && $customFieldsMapping[$cantoCustomField->id]['asAssetCollection']) {
+                $assetCollection = $this->assetCollectionRepository->findOneByTitle($cantoCustomField->name);
 
-        foreach($cantoCustomFields as $cantoCustomField){
-            if(in_array($cantoCustomField->name, $this->customFieldsToImportAsCollectionsAndTags) && is_array($cantoCustomField->values)) {
-                $assetCollection = $this->assetCollectionRepository->findOneByTitle($cantoCustomField->name); 
-
-                if(!($assetCollection instanceof AssetCollection)){
+                if (!($assetCollection instanceof AssetCollection)) {
                     $assetCollection = new AssetCollection($cantoCustomField->name);
                     $this->assetCollectionRepository->add($assetCollection);
-                    $this->outputLine('Added assetCollection: '.$cantoCustomField->name); 
+                    !$quiet && $this->outputLine('+ %s', [$cantoCustomField->name]);
+                } else {
+                    !$quiet && $this->outputLine('= %s', [$cantoCustomField->name]);
                 }
-                foreach($cantoCustomField->values as $cantoCustomFieldValue){
-                    if(is_callable($cantoCustomFieldValue)){
-                        continue; 
+
+                if ($customFieldsMapping[$cantoCustomField->id]['valuesAsTags'] !== true) {
+                    continue;
+                }
+
+                foreach ($cantoCustomField->values as $cantoCustomFieldValue) {
+                    if (!empty($customFieldsMapping[$cantoCustomField->id]['include']) && !in_array($cantoCustomFieldValue, $customFieldsMapping[$cantoCustomField->id]['include'], true)) {
+                        continue;
                     }
-                    $tag = $this->tagRepository->findOneByLabel($cantoCustomFieldValue); 
+                    if (!empty($customFieldsMapping[$cantoCustomField->id]['exclude']) && in_array($cantoCustomFieldValue, $customFieldsMapping[$cantoCustomField->id]['exclude'], true)) {
+                        continue;
+                    }
+
+                    $tag = $this->tagRepository->findOneByLabel($cantoCustomFieldValue);
 
                     if ($tag === null) {
                         $tag = new Tag($cantoCustomFieldValue);
                         $this->tagRepository->add($tag);
-                        $this->outputLine('Added Tag: '.$cantoCustomFieldValue); 
-                    }
-
-                    if($assetCollection !== null  && !$assetCollection->getTags()->contains($tag)){
                         $assetCollection->addTag($tag);
                         $this->assetCollectionRepository->update($assetCollection);
-                        $this->outputLine('Added Tag to Asset Collection: '.$cantoCustomFieldValue); 
+                        !$quiet && $this->outputLine('  + %s', [$cantoCustomFieldValue]);
+                    } elseif (!$assetCollection->getTags()->contains($tag)) {
+                        $assetCollection->addTag($tag);
+                        $this->assetCollectionRepository->update($assetCollection);
+                        !$quiet && $this->outputLine('  ~ %s', [$cantoCustomFieldValue]);
                     }
-                    
+                }
 
-                }   
-
+                !$quiet && $this->outputLine();
             }
         }
 
-       
+        !$quiet && $this->outputLine('<success>Import done.</success>');
     }
-
 }
