@@ -13,10 +13,8 @@ namespace Flownative\Canto\AssetSource;
  * source code.
  */
 
-use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\Canto\Service\CantoClient;
 use GuzzleHttp\Psr7\Uri;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Cache\Frontend\StringFrontend;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\DependencyInjection\DependencyProxy;
@@ -238,7 +236,7 @@ class CantoAssetSource implements AssetSourceInterface
         return $this->description;
     }
 
-    public function getApiBaseUri()
+    public function getApiBaseUri(): string
     {
         return $this->apiBaseUri;
     }
@@ -255,8 +253,6 @@ class CantoAssetSource implements AssetSourceInterface
 
     /**
      * @return CantoClient
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
      */
     public function getCantoClient(): CantoClient
     {

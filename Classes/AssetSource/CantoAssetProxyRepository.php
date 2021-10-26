@@ -66,7 +66,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      * @return AssetProxyInterface
      * @throws AssetNotFoundExceptionInterface
      * @throws AssetSourceConnectionExceptionInterface
-     * @throws AuthenticationFailedException
      * @throws AssetNotFoundException
      * @throws Exception
      */

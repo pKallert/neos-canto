@@ -37,7 +37,7 @@ $ composer require flownative/neos-canto
    using your own domain(!)
 5. Note down "App ID", "App Secret" and "Website" of the new key
 
-### Allow client credentials mode for API key
+#### Allow client credentials mode for API key
 
 To be able to use the Canto connection from the command line, client credentials
 mode must be enabled.
