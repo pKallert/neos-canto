@@ -69,19 +69,20 @@ class CantoCommandController extends CommandController
         !$quiet && $this->outputLine('<b>Tagging used assets of asset source "%s" via Canto API:</b>', [$assetSourceIdentifier]);
 
         try {
+            /** @var CantoAssetSource $cantoAssetSource */
             $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
             $cantoClient = $cantoAssetSource->getCantoClient();
         } catch (MissingClientSecretException $e) {
             $this->outputLine('<error>Authentication error: Missing client secret</error>');
-            exit(1);
+            $this->quit(1);
         } catch (AuthenticationFailedException $e) {
             $this->outputLine('<error>Authentication error: %s</error>', [$e->getMessage()]);
-            exit(1);
+            $this->quit(1);
         }
 
         if (!$cantoAssetSource->isAutoTaggingEnabled()) {
             $this->outputLine('<error>Auto-tagging is disabled</error>');
-            exit(1);
+            $this->quit(1);
         }
 
         $assetProxyRepository = $cantoAssetSource->getAssetProxyRepository();

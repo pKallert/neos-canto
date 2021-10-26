@@ -260,8 +260,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @param int $limit
      * @param array $orderings
      * @return Response
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
      * @throws OAuthClientException
      * @throws GuzzleException
      */
@@ -296,8 +294,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
     /**
      * @return void
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
      * @throws OAuthClientException
      * @throws GuzzleException
      */
@@ -331,8 +327,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
     /**
      * @return void
-     * @throws AuthenticationFailedException
-     * @throws IdentityProviderException
      * @throws OAuthClientException
      * @throws GuzzleException
      */
