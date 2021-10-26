@@ -3,13 +3,6 @@ Flownative:
     mapping:
       # map "Custom Fields" from Canto to Neos
       customFields: []
-#      customFields:
-#        # Foo Bar Baz                    # the name in Canto, for readbility
-#        'meta_multichoice_0':            # the custom field id in Canto
-#          asAssetCollection: false       # map to an asset collection named after the field
-#          valuesAsTags: false            # map field values to Neos tags; if true an asset is assigned a tag corresponding to the value, if false any asset "having the field" is in the collection
-#          include: []                    # only include the listed field values as tags
-#          exclude: []                    # exclude the listed field values as tags
 Neos:
   Flow:
     mvc:
