@@ -15,6 +15,7 @@ namespace Flownative\Canto\Service;
 
 use Flownative\Canto\Domain\Model\AccountAuthorization;
 use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
+use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
@@ -40,6 +41,8 @@ use Psr\Http\Message\UriInterface;
  */
 final class CantoClient
 {
+    protected bool $allowClientCredentialsAuthentication = false;
+
     /**
      * @var string
      */
@@ -86,14 +89,23 @@ final class CantoClient
 
     /**
      * @param string $apiBaseUri
+     * @param string $appId
+     * @param string $appSecret
      * @param string $serviceName
      */
-    public function __construct(string $apiBaseUri, string $serviceName)
+    public function __construct(string $apiBaseUri, string $appId, string $appSecret, string $serviceName)
     {
         $this->apiBaseUri = $apiBaseUri;
+        $this->appId = $appId;
+        $this->appSecret = $appSecret;
         $this->serviceName = $serviceName;
 
         $this->httpClient = new Client(['allow_redirects' => true]);
+    }
+
+    public function allowClientCredentialsAuthentication(bool $allowed): void
+    {
+        $this->allowClientCredentialsAuthentication = $allowed;
     }
 
     private function authenticate(): void
@@ -118,8 +130,18 @@ final class CantoClient
                         ->uriFor('needed', ['returnUri' => (string)$returnToUri], 'Authorization', 'Flownative.Canto')
                 );
             }
+        } elseif ($this->allowClientCredentialsAuthentication) {
+            $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant($this->serviceName, $this->appId, $this->appSecret, '');
+            $this->authorization = $oAuthClient->getAuthorization($authorizationId);
+            if ($this->authorization === null) {
+                $oAuthClient->requestAccessToken($this->serviceName, $this->appId, $this->appSecret, '');
+                $this->authorization = $oAuthClient->getAuthorization($authorizationId);
+            }
+            if ($this->authorization === null) {
+                throw new AuthenticationFailedException('Authentication failed: ' . ($result->help ?? 'Unknown cause'), 1630059881);
+            }
         } else {
-            throw new \RuntimeException('Security context not initialized', 1631821639);
+            throw new \RuntimeException('Security context not initialized and client credentials use not allowed', 1631821639);
         }
     }
 
