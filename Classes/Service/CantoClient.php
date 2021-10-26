@@ -18,6 +18,7 @@ use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -30,7 +31,6 @@ use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
-use Neos\Media\Domain\Model\Tag;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -143,25 +143,22 @@ final class CantoClient
      * @param string $assetProxyId
      * @return ResponseInterface
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
         [$scheme, $id] = explode('-', $assetProxyId);
-        return $this->sendAuthenticatedRequest(
-            $scheme . '/' . $id,
-            'GET',
-            []
-        );
+        return $this->sendAuthenticatedRequest($scheme . '/' . $id);
     }
 
     /**
      * @param string $id
      * @param array $metadata
      * @return ResponseInterface
+     * @TODO Implement updateFile() method.
      */
     public function updateFile(string $id, array $metadata): ResponseInterface
     {
-        // TODO: Implement updateFile() method.
         throw new \RuntimeException('not implemented');
     }
 
@@ -173,11 +170,11 @@ final class CantoClient
      * @param int $limit
      * @param array $orderings
      * @return ResponseInterface
+     * @throws GuzzleException
      * @throws OAuthClientException
      */
     public function search(string $keyword, array $formatTypes, string $customQueryPart = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
-
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
 
         $pathAndQuery .= '&limit=' . urlencode((string)$limit);
@@ -197,15 +194,11 @@ final class CantoClient
             $pathAndQuery .= '&sortDirection=' . (($orderings['lastModified'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
 
-        if(!empty($customQueryPart)){
+        if (!empty($customQueryPart)) {
             $pathAndQuery .= '&' . $customQueryPart;
         }
 
-        return $this->sendAuthenticatedRequest(
-            $pathAndQuery,
-            'GET',
-            []
-        );
+        return $this->sendAuthenticatedRequest($pathAndQuery);
     }
 
     /**
@@ -226,6 +219,7 @@ final class CantoClient
     /**
      * @return array
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function user(): array
     {
@@ -239,6 +233,7 @@ final class CantoClient
     /**
      * @return array
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function tree(): array
     {
@@ -253,6 +248,7 @@ final class CantoClient
      * @param string $assetProxyId
      * @return Uri|null
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function directUri(string $assetProxyId): ?Uri
     {
@@ -322,6 +318,7 @@ final class CantoClient
      * @param array $bodyFields
      * @return Response
      * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
     {

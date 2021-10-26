@@ -16,17 +16,17 @@ namespace Flownative\Canto\AssetSource;
 use Exception;
 use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetNotFoundExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyRepositoryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceConnectionExceptionInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetTypeFilter;
+use Neos\Media\Domain\Model\AssetSource\SupportsCollectionsInterface;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
 use Neos\Media\Domain\Model\AssetSource\SupportsTaggingInterface;
-use Neos\Media\Domain\Model\AssetSource\SupportsCollectionsInterface;
 use Neos\Media\Domain\Model\Tag;
-use Neos\Media\Domain\Model\AssetCollection;
 
 /**
  * CantoAssetProxyRepository
@@ -38,7 +38,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      */
     private $assetSource;
 
-     /**
+    /**
      * @var AssetCollection
      */
     private $activeAssetCollection;
@@ -183,11 +183,12 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         $query->prepareUntaggedQuery();
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
-        return $query->count();  
+        return $query->count();
     }
 
     /**
-     * @return void 
+     * @param AssetCollection|null $assetCollection
+     * @return void
      */
     public function filterByCollection(AssetCollection $assetCollection = null): void
     {
