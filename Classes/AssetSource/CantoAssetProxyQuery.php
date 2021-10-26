@@ -49,7 +49,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @var string
      */
-    private $tagQuery = "";
+    private $tagQuery = '';
 
     /**
      * @var AssetCollection

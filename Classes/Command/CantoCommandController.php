@@ -6,9 +6,7 @@ namespace Flownative\Canto\Command;
 use Flownative\Canto\AssetSource\CantoAssetProxy;
 use Flownative\Canto\AssetSource\CantoAssetProxyRepository;
 use Flownative\Canto\AssetSource\CantoAssetSource;
-use Flownative\Canto\Exception\AccessToAssetDeniedException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Neos\Flow\Annotations as Flow;
@@ -70,17 +68,9 @@ class CantoCommandController extends CommandController
 
         !$quiet && $this->outputLine('<b>Tagging used assets of asset source "%s" via Canto API:</b>', [$assetSourceIdentifier]);
 
-        try {
-            /** @var CantoAssetSource $cantoAssetSource */
-            $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
-            $cantoClient = $cantoAssetSource->getCantoClient();
-        } catch (MissingClientSecretException $e) {
-            $this->outputLine('<error>Authentication error: Missing client secret</error>');
-            $this->quit(1);
-        } catch (AuthenticationFailedException $e) {
-            $this->outputLine('<error>Authentication error: %s</error>', [$e->getMessage()]);
-            $this->quit(1);
-        }
+        /** @var CantoAssetSource $cantoAssetSource */
+        $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
+        $cantoClient = $cantoAssetSource->getCantoClient();
 
         if (!$cantoAssetSource->isAutoTaggingEnabled()) {
             $this->outputLine('<error>Auto-tagging is disabled</error>');
@@ -99,12 +89,7 @@ class CantoCommandController extends CommandController
                 continue;
             }
 
-            try {
-                $assetProxy = $asset->getAssetProxy();
-            } catch (AccessToAssetDeniedException $exception) {
-                $this->outputLine('   error   %s', [$exception->getMessage()]);
-                continue;
-            }
+            $assetProxy = $asset->getAssetProxy();
 
             if (!$assetProxy instanceof CantoAssetProxy) {
                 $this->outputLine('   error   Asset "%s" (%s) could not be accessed via Canto-API', [$asset->getLabel(), $asset->getIdentifier()]);

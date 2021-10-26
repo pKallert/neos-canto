@@ -51,6 +51,16 @@ final class CantoClient
     /**
      * @var string
      */
+    protected $appId;
+
+    /**
+     * @var string
+     */
+    protected $appSecret;
+
+    /**
+     * @var string
+     */
     private $serviceName;
 
     /**
