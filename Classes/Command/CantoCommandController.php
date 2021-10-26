@@ -17,8 +17,6 @@ use Neos\Media\Domain\Repository\TagRepository;
 use Neos\Media\Domain\Service\AssetSourceService;
 use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\Tag;
-use Neos\Neos\Domain\Model\User;
-use Neos\Neos\Domain\Service\UserService;
 
 class CantoCommandController extends CommandController
 {
@@ -39,12 +37,6 @@ class CantoCommandController extends CommandController
      * @var array
      */
     protected $customFieldsToImportAsCollectionsAndTags;
-
-    /**
-     * @Flow\Inject
-     * @var UserService
-     */
-    protected $userService;
 
     /**
      * @Flow\Inject
@@ -143,18 +135,19 @@ class CantoCommandController extends CommandController
     /**
      * Import Canto Custom Fields as Tags and Collections
      *
-     * @param string $username Name of the user that is used to authenticate in Canto
-     * @param string $assetSource Name of the canto asset source
+     * @param string $assetSourceIdentifier Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
      */
-    public function importCustomFieldsAsCollectionsAndTagsCommand($username, string $assetSourceIdentifier = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = true): void
+    public function importCustomFieldsAsCollectionsAndTagsCommand(string $assetSourceIdentifier = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = true): void
     {
         !$quiet && $this->outputLine('<b>Importing custom Fields as Tags and Collections via Canto API:</b>');
 
         try {
+            /** @var CantoAssetSource $cantoAssetSource */
             $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
             $cantoClient = $cantoAssetSource->getCantoClient();
+            $cantoClient->allowClientCredentialsAuthentication(true);
         } catch (\Exception $e) {
             $this->outputLine('<error>Canto Client error: Client could not be created</error>');
             exit(1);
@@ -163,19 +156,6 @@ class CantoCommandController extends CommandController
         if (empty($this->customFieldsToImportAsCollectionsAndTags)) {
             $this->outputLine('<error>Configuration error: No Tags set to be imported</error>');
             exit(1);
-        }
-
-        $user = $this->userService->getUser($username); 
-        if (!$user instanceof User) {
-            $this->outputLine('<error>The user "%s" does not exist.</error>', [$username]);
-            $this->quit(1);
-        }
-
-        try{
-            $cantoClient->setAuthorizationByUser($user); 
-        } catch (\Exception $e){
-            $this->outputLine('<error>The user has not been authorized to use Canto.</error>'); 
-            $this->quit(1); 
         }
 
         $cantoCustomFields = $cantoClient->getAllCustomFields();
