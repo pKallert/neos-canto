@@ -168,13 +168,14 @@ final class CantoClient
     /**
      * @param string $keyword
      * @param array $formatTypes
+     * @param string $customQueryPart
      * @param int $offset
      * @param int $limit
      * @param array $orderings
      * @return ResponseInterface
      * @throws OAuthClientException
      */
-    public function search(string $keyword, array $formatTypes, string $tagQuery = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
+    public function search(string $keyword, array $formatTypes, string $customQueryPart = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
 
         $pathAndQuery = 'search?keyword=' . urlencode($keyword);
@@ -196,10 +197,9 @@ final class CantoClient
             $pathAndQuery .= '&sortDirection=' . (($orderings['lastModified'] === SupportsSortingInterface::ORDER_DESCENDING) ? 'descending' : 'ascending');
         }
 
-        if(!empty($tagQuery)){
-            $pathAndQuery .= $tagQuery; 
+        if(!empty($customQueryPart)){
+            $pathAndQuery .= '&' . $customQueryPart;
         }
-        
 
         return $this->sendAuthenticatedRequest(
             $pathAndQuery,
@@ -208,29 +208,21 @@ final class CantoClient
         );
     }
 
-
     /**
-     * @todo perhaps cache the request somehow? 
-     * 
      * @return array
      * @throws OAuthClientException
+     * @throws GuzzleException
+     * @todo perhaps cache the result
      */
-    public function getAllCustomFields(){
-        $query = "custom/field";
-        $result = $this->sendAuthenticatedRequest(
-            $query,
-            'GET',
-            []
-        );
-        if ($result->getStatusCode() === 200) {
-            return \GuzzleHttp\json_decode($result->getBody());
+    public function getCustomFields(): array
+    {
+        $response = $this->sendAuthenticatedRequest('custom/field');
+        if ($response->getStatusCode() === 200) {
+            return \GuzzleHttp\json_decode($response->getBody()->getContents());
         }
         return [];
     }
 
-
-
-  
     /**
      * @return array
      * @throws OAuthClientException

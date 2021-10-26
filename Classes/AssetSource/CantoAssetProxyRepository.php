@@ -128,8 +128,8 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function findByTag(Tag $tag): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
-        $query->setTag($tag);
-        $query->setAssetCollection($this->activeAssetCollection); 
+        $query->setActiveTag($tag);
+        $query->setActiveAssetCollection($this->activeAssetCollection);
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
         return new CantoAssetProxyQueryResult($query);
@@ -141,7 +141,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function findUntagged(): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
-        $query->setAssetCollection($this->activeAssetCollection); 
+        $query->setActiveAssetCollection($this->activeAssetCollection);
         $query->prepareUntaggedQuery();
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
@@ -179,8 +179,8 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     public function countUntagged(): int
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
-        $query->setAssetCollection($this->activeAssetCollection); 
-        $query->prepareUntaggedQuery(); 
+        $query->setActiveAssetCollection($this->activeAssetCollection);
+        $query->prepareUntaggedQuery();
         $query->setAssetTypeFilter($this->assetTypeFilter);
         $query->setOrderings($this->orderings);
         return $query->count();  

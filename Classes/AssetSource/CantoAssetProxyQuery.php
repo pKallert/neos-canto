@@ -151,7 +151,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @param Tag $tag
      */
-    public function setTag(Tag $tag): void
+    public function setActiveTag(Tag $tag): void
     {
         $this->tag = $tag;
     }
@@ -159,23 +159,23 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @return Tag
      */
-    public function getTag(): Tag
+    public function getActiveTag(): Tag
     {
         return $this->tag;
     }
 
     /**
-     * @param AssetCollection $assetCollection
+     * @param AssetCollection|null $assetCollection
      */
-    public function setAssetCollection(AssetCollection $assetCollection = null): void
+    public function setActiveAssetCollection(AssetCollection $assetCollection = null): void
     {
         $this->assetCollection = $assetCollection;
     }
 
     /**
-     * @return AssetCollection
+     * @return AssetCollection|null
      */
-    public function getAssetCollection(): AssetCollection
+    public function getActiveAssetCollection(): ?AssetCollection
     {
         return $this->assetCollection;
     }
@@ -321,7 +321,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         $this->tagQuery = "";
 
         if(!empty($this->mapping['customFields'])){
-            $allCantoCustomFields = $this->assetSource->getCantoClient()->getAllCustomFields();
+            $allCantoCustomFields = $this->assetSource->getCantoClient()->getCustomFields();
 
             foreach($allCantoCustomFields as $cantoCustomField){
                 //field should not be mapped if it does not exist in the settings or if asAssetCollection is set to false
@@ -344,7 +344,7 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         $this->tagQuery = "";
         if(!empty($this->mapping['customFields'])) {
             if (!empty($this->assetCollection)) {
-                $allCantoCustomFields = $this->assetSource->getCantoClient()->getAllCustomFields();
+                $allCantoCustomFields = $this->assetSource->getCantoClient()->getCustomFields();
                 foreach ($allCantoCustomFields as $cantoCustomField) {
                     if ($cantoCustomField->name == $this->assetCollection->getTitle() && $this->mapping['customFields'][$cantoCustomField->id]['asAssetCollection']) {
                         $this->tagQuery .= '&' . $cantoCustomField->id . '.keyword="__null__"';
