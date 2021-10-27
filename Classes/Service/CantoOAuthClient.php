@@ -102,6 +102,10 @@ class CantoOAuthClient extends OAuthClient
 
     public function renderFinishAuthorizationUri(): string
     {
+        if (FLOW_SAPITYPE === 'CLI') {
+            return '';
+        }
+
         $currentRequestHandler = $this->bootstrap->getActiveRequestHandler();
         $httpRequest = $currentRequestHandler->getHttpRequest();
         $actionRequest = ActionRequest::fromHttpRequest($httpRequest);

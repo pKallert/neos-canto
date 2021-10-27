@@ -1,17 +1,24 @@
 <?php
 declare(strict_types=1);
+
 namespace Flownative\Canto\Command;
 
 use Flownative\Canto\AssetSource\CantoAssetProxy;
 use Flownative\Canto\AssetSource\CantoAssetProxyRepository;
 use Flownative\Canto\AssetSource\CantoAssetSource;
-use Flownative\Canto\Exception\AccessToAssetDeniedException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
-use Flownative\Canto\Exception\MissingClientSecretException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
+use Neos\Flow\Cli\Exception\StopCommandException;
+use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Media\Domain\Model\Asset;
+use Neos\Media\Domain\Model\AssetCollection;
+use Neos\Media\Domain\Model\Tag;
+use Neos\Media\Domain\Repository\AssetCollectionRepository;
 use Neos\Media\Domain\Repository\AssetRepository;
+use Neos\Media\Domain\Repository\TagRepository;
 use Neos\Media\Domain\Service\AssetSourceService;
 
 class CantoCommandController extends CommandController
@@ -29,11 +36,30 @@ class CantoCommandController extends CommandController
     protected $assetSourceService;
 
     /**
+     * @Flow\Inject
+     * @var TagRepository
+     */
+    protected $tagRepository;
+
+    /**
+     * @Flow\Inject
+     * @var AssetCollectionRepository
+     */
+    protected $assetCollectionRepository;
+
+    /**
+     * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
+     * @var array
+     */
+    protected $mapping = [];
+
+    /**
      * Tag used assets
      *
      * @param string $assetSource Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
      * @return void
+     * @throws StopCommandException
      */
     public function tagUsedAssetsCommand(string $assetSource = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = false): void
     {
@@ -42,20 +68,13 @@ class CantoCommandController extends CommandController
 
         !$quiet && $this->outputLine('<b>Tagging used assets of asset source "%s" via Canto API:</b>', [$assetSourceIdentifier]);
 
-        try {
-            $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
-            $cantoClient = $cantoAssetSource->getCantoClient();
-        } catch (MissingClientSecretException $e) {
-            $this->outputLine('<error>Authentication error: Missing client secret</error>');
-            exit(1);
-        } catch (AuthenticationFailedException $e) {
-            $this->outputLine('<error>Authentication error: %s</error>', [$e->getMessage()]);
-            exit(1);
-        }
+        /** @var CantoAssetSource $cantoAssetSource */
+        $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
+        $cantoClient = $cantoAssetSource->getCantoClient();
 
         if (!$cantoAssetSource->isAutoTaggingEnabled()) {
             $this->outputLine('<error>Auto-tagging is disabled</error>');
-            exit(1);
+            $this->quit(1);
         }
 
         $assetProxyRepository = $cantoAssetSource->getAssetProxyRepository();
@@ -70,12 +89,7 @@ class CantoCommandController extends CommandController
                 continue;
             }
 
-            try {
-                $assetProxy = $asset->getAssetProxy();
-            } catch (AccessToAssetDeniedException $exception) {
-                $this->outputLine('   error   %s', [$exception->getMessage()]);
-                continue;
-            }
+            $assetProxy = $asset->getAssetProxy();
 
             if (!$assetProxy instanceof CantoAssetProxy) {
                 $this->outputLine('   error   Asset "%s" (%s) could not be accessed via Canto-API', [$asset->getLabel(), $asset->getIdentifier()]);
@@ -108,5 +122,84 @@ class CantoCommandController extends CommandController
                 }
             }
         }
+    }
+
+    /**
+     * Import Canto Custom Fields as Tags and Collections
+     *
+     * @param string $assetSourceIdentifier Name of the canto asset source
+     * @param bool $quiet If set, only errors will be displayed.
+     * @return void
+     * @throws GuzzleException
+     * @throws IllegalObjectTypeException
+     * @throws OAuthClientException
+     * @throws StopCommandException
+     * @throws AuthenticationFailedException
+     */
+    public function importCustomFieldsAsCollectionsAndTagsCommand(string $assetSourceIdentifier = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = true): void
+    {
+        !$quiet && $this->outputLine('<b>Importing custom fields as tags and asset collections via Canto API</b>');
+
+        $customFieldsMapping = $this->mapping['customFields'];
+        if (empty($customFieldsMapping)) {
+            $this->outputLine('<error>No custom fields configured for mapping</error>');
+            $this->quit(1);
+        }
+
+        try {
+            /** @var CantoAssetSource $cantoAssetSource */
+            $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
+            $cantoClient = $cantoAssetSource->getCantoClient();
+            $cantoClient->allowClientCredentialsAuthentication(true);
+        } catch (\Exception $e) {
+            $this->outputLine('<error>Canto client could not be created</error>');
+            $this->quit(1);
+        }
+
+        $cantoCustomFields = $cantoClient->getCustomFields();
+        foreach ($cantoCustomFields as $cantoCustomField) {
+            if (array_key_exists($cantoCustomField->id, $customFieldsMapping) && $customFieldsMapping[$cantoCustomField->id]['asAssetCollection']) {
+                $assetCollection = $this->assetCollectionRepository->findOneByTitle($cantoCustomField->name);
+
+                if (!($assetCollection instanceof AssetCollection)) {
+                    $assetCollection = new AssetCollection($cantoCustomField->name);
+                    $this->assetCollectionRepository->add($assetCollection);
+                    !$quiet && $this->outputLine('+ %s', [$cantoCustomField->name]);
+                } else {
+                    !$quiet && $this->outputLine('= %s', [$cantoCustomField->name]);
+                }
+
+                if ($customFieldsMapping[$cantoCustomField->id]['valuesAsTags'] !== true) {
+                    continue;
+                }
+
+                foreach ($cantoCustomField->values as $cantoCustomFieldValue) {
+                    if (!empty($customFieldsMapping[$cantoCustomField->id]['include']) && !in_array($cantoCustomFieldValue, $customFieldsMapping[$cantoCustomField->id]['include'], true)) {
+                        continue;
+                    }
+                    if (!empty($customFieldsMapping[$cantoCustomField->id]['exclude']) && in_array($cantoCustomFieldValue, $customFieldsMapping[$cantoCustomField->id]['exclude'], true)) {
+                        continue;
+                    }
+
+                    $tag = $this->tagRepository->findOneByLabel($cantoCustomFieldValue);
+
+                    if ($tag === null) {
+                        $tag = new Tag($cantoCustomFieldValue);
+                        $this->tagRepository->add($tag);
+                        $assetCollection->addTag($tag);
+                        $this->assetCollectionRepository->update($assetCollection);
+                        !$quiet && $this->outputLine('  + %s', [$cantoCustomFieldValue]);
+                    } elseif (!$assetCollection->getTags()->contains($tag)) {
+                        $assetCollection->addTag($tag);
+                        $this->assetCollectionRepository->update($assetCollection);
+                        !$quiet && $this->outputLine('  ~ %s', [$cantoCustomFieldValue]);
+                    }
+                }
+
+                !$quiet && $this->outputLine();
+            }
+        }
+
+        !$quiet && $this->outputLine('<success>Import done.</success>');
     }
 }

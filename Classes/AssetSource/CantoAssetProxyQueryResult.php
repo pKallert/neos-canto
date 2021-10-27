@@ -13,6 +13,11 @@ namespace Flownative\Canto\AssetSource;
  * source code.
  */
 
+use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
+use Neos\Cache\Exception as CacheException;
+use Neos\Cache\Exception\InvalidDataException;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
@@ -52,6 +57,11 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
 
     /**
      * @return void
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws CacheException
+     * @throws InvalidDataException
+     * @throws AuthenticationFailedException
      */
     private function initialize(): void
     {
@@ -71,6 +81,11 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
 
     /**
      * @return AssetProxyInterface|null
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      */
     public function getFirst(): ?AssetProxyInterface
     {
@@ -80,6 +95,11 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
 
     /**
      * @return AssetProxyInterface[]
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
      */
     public function toArray(): array
     {
@@ -141,6 +161,9 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
 
     /**
      * @return int
+     * @throws OAuthClientException
+     * @throws GuzzleException
+     * @throws AuthenticationFailedException
      */
     public function count(): int
     {

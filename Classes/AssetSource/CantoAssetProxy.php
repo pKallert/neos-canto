@@ -14,11 +14,13 @@ namespace Flownative\Canto\AssetSource;
  */
 
 use Exception;
+use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\HasRemoteOriginalInterface;
-use Neos\Media\Domain\Model\AssetSource\AssetProxy\ProvidesOriginalUriInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\SupportsIptcMetadataInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
 use Neos\Media\Domain\Model\ImportedAsset;
@@ -30,7 +32,7 @@ use stdClass;
 /**
  *
  */
-final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface, ProvidesOriginalUriInterface, SupportsIptcMetadataInterface
+final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface, SupportsIptcMetadataInterface
 {
     /**
      * @var CantoAssetSource
@@ -252,18 +254,13 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
 
     /**
      * @return resource
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws GuzzleException
      */
     public function getImportStream()
     {
         return fopen((string)$this->assetSource->getCantoClient()->directUri($this->identifier), 'rb');
-    }
-
-    /**
-     * @return UriInterface
-     */
-    public function getOriginalUri(): UriInterface
-    {
-        return $this->assetSource->getCantoClient()->directUri($this->identifier);
     }
 
     /**
