@@ -155,10 +155,10 @@ Neos side.
    3. Fill in the "Secure Token"
    4. Click "Add"
 
-Event           | Webhook URL (path)
---------------- | --------------------------------
-Update Metadata | /flownative-canto/webhook/update
-Add New Version | /flownative-canto/webhook/add
+| Event           | Webhook URL (path)               |
+|-----------------|----------------------------------|
+| Update Metadata | /flownative-canto/webhook/update |
+| Add New Version | /flownative-canto/webhook/add    |
 
 Note: The webhook URL must be prefixed with the publicly accessible hostname of
 your Neos instance, and HTTPS should be used to secure the secure token!
