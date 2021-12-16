@@ -73,6 +73,8 @@ final class AssetUpdateService
                 return $this->handleAssetMetadataUpdated($payload);
             case 'add':
                 return $this->handleNewAssetVersionAdded($payload);
+            default:
+                $this->logger->debug(sprintf('Unhandled event "%s" skipped', $event), LogEnvironment::fromMethodName(__METHOD__));
         }
 
         return false;
@@ -92,13 +94,17 @@ final class AssetUpdateService
 
         $this->logger->debug(sprintf('Metadata cache flushed for asset %s', $identifier), LogEnvironment::fromMethodName(__METHOD__));
 
-        // leads to "Modifications are not allowed as soon as the PersistentResource has been published or persisted."
-        // $proxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
+        // Code like $localAsset->getResource()->setFilename($proxy->getFilename()) leads to a
+        // "Modifications are not allowed as soon as the PersistentResource has been published or persisted."
+        // error. Thus we need to replace the asset to get the new name into the system.
+        $this->replaceAsset($identifier);
+
+        // But code like this could be used to update other asset metadata:
+        // $assetProxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
         // $localAssetIdentifier = $importedAsset->getLocalAssetIdentifier();
         // $localAsset = $this->assetRepository->findByIdentifier($localAssetIdentifier);
-        // $localAsset->getResource()->setFilename($proxy->getFilename());
-
-        $this->replaceAsset($identifier);
+        // $localAsset->setTitle($assetProxy->getIptcProperty('Title'));
+        // $localAsset->setCaption($assetProxy->getIptcProperty('CaptionAbstract'));
 
         return true;
     }
@@ -135,7 +141,7 @@ final class AssetUpdateService
         $assetResource->setFilename($proxy->getFilename());
         $this->assetService->replaceAssetResource($localAsset, $assetResource);
 
-        // TODO do we need to delete the "old" resource? … to delete it here!
+        // TODO … to delete it here!
         // $this->resourceManager->deleteResource($previousResource);
 
         $this->logger->debug(sprintf('Replaced resource on %s from %s', $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
