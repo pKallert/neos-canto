@@ -143,7 +143,7 @@ final class CantoClient
         } elseif ($this->allowClientCredentialsAuthentication) {
             $authorizationId = Authorization::generateAuthorizationIdForClientCredentialsGrant($this->serviceName, $this->appId, $this->appSecret, '');
             $this->authorization = $oAuthClient->getAuthorization($authorizationId);
-            if ($this->authorization === null) {
+            if ($this->authorization === null || ($this->authorization->getAccessToken() && $this->authorization->getAccessToken()->hasExpired())) {
                 $oAuthClient->requestAccessToken($this->serviceName, $this->appId, $this->appSecret, '');
                 $this->authorization = $oAuthClient->getAuthorization($authorizationId);
             }
