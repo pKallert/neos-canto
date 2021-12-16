@@ -163,6 +163,9 @@ final class AssetUpdateService
      */
     private function getAssetSource(): AssetSourceInterface
     {
-        return $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER];
+        /** @var CantoAssetSource $assetSource */
+        $assetSource = $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER];
+        $assetSource->getCantoClient()->allowClientCredentialsAuthentication(true);
+        return $assetSource;
     }
 }
