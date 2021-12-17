@@ -15,10 +15,12 @@ namespace Flownative\Canto\Service;
 
 use Flownative\Canto\AssetSource\CantoAssetSource;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Media\Domain\Model\AssetInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
+use Neos\Media\Domain\Model\ImageVariant;
 use Neos\Media\Domain\Repository\AssetRepository;
 use Neos\Media\Domain\Repository\ImportedAssetRepository;
 use Neos\Media\Domain\Service\AssetService;
@@ -35,6 +37,12 @@ final class AssetUpdateService
      * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @Flow\Inject
+     * @var ThrowableStorageInterface
+     */
+    protected $throwableStorage;
 
     /**
      * @Flow\Inject
@@ -90,23 +98,23 @@ final class AssetUpdateService
             return true;
         }
 
-        $this->flushProxyForAsset($identifier);
+        try {
+            // Code like $localAsset->getResource()->setFilename($proxy->getFilename()) leads to a
+            // "Modifications are not allowed as soon as the PersistentResource has been published or persisted."
+            // error. Thus we need to replace the asset to get the new name into the system.
+            $this->replaceAsset($identifier);
 
-        $this->logger->debug(sprintf('Metadata cache flushed for asset %s', $identifier), LogEnvironment::fromMethodName(__METHOD__));
+            // But code like this could be used to update other asset metadata:
+            // $assetProxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
+            // $localAssetIdentifier = $importedAsset->getLocalAssetIdentifier();
+            // $localAsset = $this->assetRepository->findByIdentifier($localAssetIdentifier);
+            // $localAsset->setTitle($assetProxy->getIptcProperty('Title'));
+            // $localAsset->setCaption($assetProxy->getIptcProperty('CaptionAbstract'));
 
-        // Code like $localAsset->getResource()->setFilename($proxy->getFilename()) leads to a
-        // "Modifications are not allowed as soon as the PersistentResource has been published or persisted."
-        // error. Thus we need to replace the asset to get the new name into the system.
-        $this->replaceAsset($identifier);
-
-        // But code like this could be used to update other asset metadata:
-        // $assetProxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
-        // $localAssetIdentifier = $importedAsset->getLocalAssetIdentifier();
-        // $localAsset = $this->assetRepository->findByIdentifier($localAssetIdentifier);
-        // $localAsset->setTitle($assetProxy->getIptcProperty('Title'));
-        // $localAsset->setCaption($assetProxy->getIptcProperty('CaptionAbstract'));
-
-        return true;
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     public function handleNewAssetVersionAdded(array $payload): bool
@@ -119,10 +127,14 @@ final class AssetUpdateService
             return true;
         }
 
-        $this->flushProxyForAsset($identifier);
-        $this->replaceAsset($identifier);
+        try {
+            $this->flushProxyForAsset($identifier);
+            $this->replaceAsset($identifier);
 
-        return true;
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     // TODO this "works" but used assets still have the same filename when used in frontend, so it seems incomplete
@@ -133,11 +145,20 @@ final class AssetUpdateService
 
         /** @var AssetInterface $localAsset */
         $localAsset = $this->assetRepository->findByIdentifier($localAssetIdentifier);
+        if ($localAsset instanceof ImageVariant) {
+            $this->logger->debug(sprintf('Did not replace resource on %s from %s, the local asset is an ImageVariant', $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
+            return;
+        }
         // TODO do we need to delete the "old" resource? then we need to grab it here…
         // $previousResource = $localAsset->getResource();
 
-        $proxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
-        $assetResource = $this->resourceManager->importResource($proxy->getImportStream());
+        try {
+            $proxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
+            $assetResource = $this->resourceManager->importResource($proxy->getImportStream());
+        } catch (\Exception $e) {
+            $this->logger->debug(sprintf('Could not replace resource on %s from %s, exception: %s', $localAssetIdentifier, $identifier, $this->throwableStorage->logThrowable($e)), LogEnvironment::fromMethodName(__METHOD__));;
+            throw $e;
+        }
         $assetResource->setFilename($proxy->getFilename());
         $this->assetService->replaceAssetResource($localAsset, $assetResource);
 
