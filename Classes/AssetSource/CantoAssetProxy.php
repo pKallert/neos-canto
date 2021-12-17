@@ -285,6 +285,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
      */
     public function isImported(): bool
     {
-        return true;
+        $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier($this->assetSource->getIdentifier(), $this->identifier);
+        return ($importedAsset instanceof ImportedAsset);
     }
 }
