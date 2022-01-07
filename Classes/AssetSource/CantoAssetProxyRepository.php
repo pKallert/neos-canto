@@ -79,8 +79,12 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         if ($cacheEntry) {
             $responseObject = \GuzzleHttp\json_decode($cacheEntry);
         } else {
-            $response = $this->assetSource->getCantoClient()->getFile($identifier);
-            $responseObject = \GuzzleHttp\json_decode($response->getBody());
+            try {
+                $response = $this->assetSource->getCantoClient()->getFile($identifier);
+                $responseObject = \GuzzleHttp\json_decode($response->getBody());
+            } catch (\Exception $e) {
+                throw new AssetNotFoundException('Asset not found', 1526636260);
+            }
         }
 
         if (!$responseObject instanceof \stdClass) {
