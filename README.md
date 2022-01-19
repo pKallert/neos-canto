@@ -39,8 +39,8 @@ $ composer require flownative/neos-canto
 
 #### Allow client credentials mode for API key
 
-To be able to use the Canto connection from the command line, client credentials
-mode must be enabled.
+To be able to use the Canto connection from the command line or to use the webhook
+feature described below, client credentials mode must be enabled.
 
 1. In Canto go to Settings > Configuration Options > API > API Keys
 2. Edit the API key you use for the Neos integration
@@ -132,6 +132,51 @@ Flownative:
 
 **Note:** The asset collections and tags must be created manually on the Neos
 side (for now.)
+
+## Change notification from Canto
+
+The package provides webhooks that can be used to notify of changes in Canto.
+
+When assets in Canto are modified, those hooks trigger the needed update on the
+Neos side.
+
+- For *metadata updates* the changes are transferred to the imported asset, as
+ far as the metadata is used in Neos.
+- If *new versions* are added, those are imported and replace the existing asset
+  in Neos.
+
+### Enabling webhooks in Canto
+
+1. In Canto go to Settings > Configuration Options > API > Webhooks
+2. Generate some random string for use as "Secure Token"
+3. Configure webhooks for "Update Metadata", "Add New Version"
+   1. Use the matching URL for each hook as shown below
+   2. Chose JSON as "Content Type"
+   3. Fill in the "Secure Token"
+   4. Click "Add"
+
+| Event           | Webhook URL (path)               |
+|-----------------|----------------------------------|
+| Update Metadata | /flownative-canto/webhook/update |
+| Add New Version | /flownative-canto/webhook/add    |
+
+Note: The webhook URL must be prefixed with the publicly accessible hostname of
+your Neos instance, and HTTPS should be used to secure the secure token!
+
+### Configure secure token in Neos
+
+Set the "Secure Token" value using the environment variable
+
+- `FLOWNATIVE_CANTO_WEBHOOK_TOKEN`
+
+or directly in `Settings.yaml`
+
+```yaml
+Flownative:
+  Canto:
+    webhook:
+      token: 'some-random-string-of-your-choice'
+```
 
 ### Cleaning up unused assets
 

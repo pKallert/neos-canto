@@ -121,6 +121,7 @@ final class CantoClient
     private function authenticate(): void
     {
         $oAuthClient = new CantoOAuthClient($this->serviceName);
+
         if ($this->securityContext->isInitialized()) {
             $account = $this->securityContext->getAccount();
             $accountAuthorization = $account ? $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($account->getAccountIdentifier()) : null;
