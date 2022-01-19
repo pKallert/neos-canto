@@ -25,6 +25,8 @@ use Neos\Media\Domain\Model\AssetSource\AssetProxy\SupportsIptcMetadataInterface
 use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
 use Neos\Media\Domain\Model\ImportedAsset;
 use Neos\Media\Domain\Repository\ImportedAssetRepository;
+use Neos\Media\Domain\Service\ThumbnailService;
+use Neos\Media\Exception\ThumbnailServiceException;
 use Neos\Utility\MediaTypes;
 use Psr\Http\Message\UriInterface;
 use stdClass;
@@ -75,12 +77,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     private $iptcProperties = [];
 
     /**
-     * @var UriInterface
-     */
-    private $thumbnailUri;
-
-    /**
-     * @var UriInterface
+     * @var string
      */
     private $previewUri;
 
@@ -104,6 +101,12 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
      * @var ImportedAssetRepository
      */
     protected $importedAssetRepository;
+
+    /**
+     * @FLow\Inject
+     * @var ThumbnailService
+     */
+    protected $thumbnailService;
 
     /**
      * @param stdClass $jsonObject
@@ -132,8 +135,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $assetProxy->widthInPixels = $jsonObject->width ? (int)$jsonObject->width : null;
         $assetProxy->heightInPixels = $jsonObject->height ? (int)$jsonObject->height : null;
 
-        $assetProxy->thumbnailUri = new Uri($jsonObject->url->directUrlPreview);
-        $assetProxy->previewUri = new Uri($jsonObject->url->directUrlPreview);
+        $assetProxy->previewUri = $jsonObject->url->directUrlPreview;
 
         return $assetProxy;
     }
@@ -238,18 +240,30 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
 
     /**
      * @return UriInterface
+     * @throws ThumbnailServiceException
      */
     public function getThumbnailUri(): ?UriInterface
     {
-        return $this->thumbnailUri;
+        $thumbnailConfiguration = $this->thumbnailService->getThumbnailConfigurationForPreset('Neos.Media.Browser:Thumbnail');
+        return new Uri(sprintf(
+            '%s/%d',
+            preg_replace('|/[0-9]+$|', '', $this->previewUri),
+            max($thumbnailConfiguration->getMaximumWidth(), $thumbnailConfiguration->getMaximumHeight())
+        ));
     }
 
     /**
      * @return UriInterface
+     * @throws ThumbnailServiceException
      */
     public function getPreviewUri(): ?UriInterface
     {
-        return $this->previewUri;
+        $previewConfiguration = $this->thumbnailService->getThumbnailConfigurationForPreset('Neos.Media.Browser:Preview');
+        return new Uri(sprintf(
+            '%s/%d',
+            preg_replace('|/[0-9]+$|', '', $this->previewUri),
+            max($previewConfiguration->getMaximumWidth(), $previewConfiguration->getMaximumHeight())
+        ));
     }
 
     /**
