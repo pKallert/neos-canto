@@ -16,6 +16,7 @@ namespace Flownative\Canto\Service;
 use Flownative\Canto\Domain\Model\AccountAuthorization;
 use Flownative\Canto\Domain\Repository\AccountAuthorizationRepository;
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\Authorization;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Client;
@@ -24,11 +25,14 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Core\Bootstrap;
+use Neos\Flow\Http\Exception as HttpException;
 use Neos\Flow\Http\HttpRequestHandlerInterface;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Exception\StopActionException;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Flow\Mvc\Routing\UriBuilder;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
@@ -118,6 +122,13 @@ final class CantoClient
         $this->allowClientCredentialsAuthentication = $allowed;
     }
 
+    /**
+     * @throws MissingClientSecretException
+     * @throws HttpException
+     * @throws MissingActionNameException
+     * @throws AuthenticationFailedException
+     * @throws IdentityProviderException
+     */
     private function authenticate(): void
     {
         $oAuthClient = new CantoOAuthClient($this->serviceName);
@@ -151,7 +162,7 @@ final class CantoClient
                 throw new AuthenticationFailedException('Authentication failed: ' . ($result->help ?? 'Unknown cause'), 1630059881);
             }
         } else {
-            throw new \RuntimeException('Security context not initialized and client credentials use not allowed', 1631821639);
+            throw new MissingClientSecretException('Security context not initialized and client credentials use not allowed', 1631821639);
         }
     }
 
@@ -176,7 +187,11 @@ final class CantoClient
      * @return ResponseInterface
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws IdentityProviderException
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
@@ -205,6 +220,10 @@ final class CantoClient
      * @return ResponseInterface
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
      */
     public function search(string $keyword, array $formatTypes, string $customQueryPart = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
@@ -239,6 +258,10 @@ final class CantoClient
      * @return array
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
      * @todo perhaps cache the result
      */
@@ -255,6 +278,10 @@ final class CantoClient
      * @return array
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
      */
     public function user(): array
@@ -270,6 +297,10 @@ final class CantoClient
      * @return array
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
      */
     public function tree(): array
@@ -286,6 +317,10 @@ final class CantoClient
      * @return Uri|null
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
      */
     public function directUri(string $assetProxyId): ?Uri
@@ -357,6 +392,10 @@ final class CantoClient
      * @return Response
      * @throws AuthenticationFailedException
      * @throws GuzzleException
+     * @throws HttpException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
      * @throws OAuthClientException
      */
     public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
