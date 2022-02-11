@@ -406,4 +406,26 @@ final class CantoClient
 
         return $this->httpClient->send($this->getAuthenticatedRequest($this->authorization, $uriPathAndQuery, $method, $bodyFields));
     }
+
+    /**
+     * Checks if the current user is authenticated and has a valid access-token.
+     *
+     * @return bool
+     */
+    public function isAuthenticated(): bool
+    {
+        $oAuthClient = new CantoOAuthClient($this->serviceName);
+
+        if ($this->securityContext->isInitialized()) {
+            $account = $this->securityContext->getAccount();
+            $accountAuthorization = $account ? $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($account->getAccountIdentifier()) : null;
+            $authorization = $accountAuthorization instanceof AccountAuthorization ? $oAuthClient->getAuthorization($accountAuthorization->getAuthorizationId()) : null;
+
+            if ($authorization !== null && ($authorization->getAccessToken() && !$authorization->getAccessToken()->hasExpired())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
