@@ -408,7 +408,9 @@ final class CantoClient
     }
 
     /**
-     * Checks if the current user is authenticated and has a valid access-token.
+     * Checks if the current account fetched from the security context has a valid access-token.
+     *
+     * If the security context is not initialized, no account is found or no valid access-token exists, false is returned.
      *
      * @return bool
      */
