@@ -128,7 +128,6 @@ final class AssetUpdateService
         }
 
         try {
-            $this->flushProxyForAsset($identifier);
             $this->replaceAsset($identifier);
 
             return true;
@@ -153,6 +152,7 @@ final class AssetUpdateService
         // $previousResource = $localAsset->getResource();
 
         try {
+            $this->flushProxyForAsset($identifier);
             $proxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
             $assetResource = $this->resourceManager->importResource($proxy->getImportStream());
         } catch (\Exception $e) {
