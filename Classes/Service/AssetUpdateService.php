@@ -148,8 +148,8 @@ final class AssetUpdateService
             $this->logger->debug(sprintf('Did not replace resource on %s from %s, the local asset is an ImageVariant', $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
             return;
         }
-        // TODO do we need to delete the "old" resource? then we need to grab it here…
-        // $previousResource = $localAsset->getResource();
+        // we need to delete the "old" resource, so we grab it here…
+        $previousResource = $localAsset->getResource();
 
         try {
             $this->flushProxyForAsset($identifier);
@@ -162,8 +162,8 @@ final class AssetUpdateService
         $assetResource->setFilename($proxy->getFilename());
         $this->assetService->replaceAssetResource($localAsset, $assetResource);
 
-        // TODO … to delete it here!
-        // $this->resourceManager->deleteResource($previousResource);
+        // … to delete it here!
+        $this->resourceManager->deleteResource($previousResource);
 
         $this->logger->debug(sprintf('Replaced resource on %s from %s', $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
     }
