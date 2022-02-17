@@ -17,6 +17,7 @@ use Flownative\Canto\AssetSource\CantoAssetSource;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Log\Utility\LogEnvironment;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Media\Domain\Model\AssetInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
@@ -70,6 +71,12 @@ final class AssetUpdateService
 
     /**
      * @Flow\Inject
+     * @var PersistenceManagerInterface
+     */
+    protected $persistenceManager;
+
+    /**
+     * @Flow\Inject
      * @var AssetSourceService
      */
     protected $assetSourceService;
@@ -111,6 +118,8 @@ final class AssetUpdateService
             // $localAsset->setTitle($assetProxy->getIptcProperty('Title'));
             // $localAsset->setCaption($assetProxy->getIptcProperty('CaptionAbstract'));
 
+            $this->persistenceManager->persistAll();
+
             return true;
         } catch (\Exception $e) {
             return false;
@@ -130,13 +139,14 @@ final class AssetUpdateService
         try {
             $this->replaceAsset($identifier);
 
+            $this->persistenceManager->persistAll();
+
             return true;
         } catch (\Exception $e) {
             return false;
         }
     }
 
-    // TODO this "works" but used assets still have the same filename when used in frontend, so it seems incomplete
     private function replaceAsset(string $identifier): void
     {
         $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier(CantoAssetSource::ASSET_SOURCE_IDENTIFIER, $identifier);
