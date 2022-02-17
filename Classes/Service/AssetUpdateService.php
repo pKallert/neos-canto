@@ -154,18 +154,18 @@ final class AssetUpdateService
         try {
             $this->flushProxyForAsset($identifier);
             $proxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
-            $assetResource = $this->resourceManager->importResource($proxy->getImportStream());
+            $newResource = $this->resourceManager->importResource($proxy->getImportStream());
         } catch (\Exception $e) {
-            $this->logger->debug(sprintf('Could not replace resource on %s from %s, exception: %s', $localAssetIdentifier, $identifier, $this->throwableStorage->logThrowable($e)), LogEnvironment::fromMethodName(__METHOD__));;
+            $this->logger->debug(sprintf('Could not import resource for asset %s from %s, exception: %s', $localAssetIdentifier, $identifier, $this->throwableStorage->logThrowable($e)), LogEnvironment::fromMethodName(__METHOD__));;
             throw $e;
         }
-        $assetResource->setFilename($proxy->getFilename());
-        $this->assetService->replaceAssetResource($localAsset, $assetResource);
+        $newResource->setFilename($proxy->getFilename());
+        $this->assetService->replaceAssetResource($localAsset, $newResource);
+        $this->logger->debug(sprintf('Replaced resource %s with %s on asset %s from Canto asset %s', $localAsset->getResource()->getSha1(), $newResource->getSha1(), $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
 
         // … to delete it here!
+        $this->logger->debug(sprintf('Trying to delete replaced resource: %s (%s)', $previousResource->getFilename(), $previousResource->getSha1()), LogEnvironment::fromMethodName(__METHOD__));;
         $this->resourceManager->deleteResource($previousResource);
-
-        $this->logger->debug(sprintf('Replaced resource on %s from %s', $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
     }
 
     private function buildIdentifier(string $scheme, string $identifier): string
