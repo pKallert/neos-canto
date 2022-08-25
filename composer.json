@@ -4,13 +4,13 @@
     "name": "flownative/neos-canto",
     "license": "MIT",
     "require": {
-        "php": "^7.4",
+        "php": "^8.0",
         "ext-json": "*",
-        "neos/flow": "^5.3 || ^6.0 || ^7.0 || dev-master",
-        "neos/media": "^4.3 || ^5.0 || ^7.0 || dev-master",
-        "guzzlehttp/guzzle": "6.*",
+        "neos/flow": "^8.0 || dev-master",
+        "neos/media": "^8.0 || dev-master",
+        "guzzlehttp/guzzle": "^7.0",
         "behat/transliterator": "~1.0",
-        "flownative/oauth2-client": "^2.2 || ^3.4"
+        "flownative/oauth2-client": "^4.0.2"
     },
     "autoload": {
         "psr-4": {
