@@ -68,11 +68,6 @@ class CantoAssetSource implements AssetSourceInterface
     private $cantoClient;
 
     /**
-     * @var array
-     */
-    private $assetSourceOptions;
-
-    /**
      * @var string
      */
     private $iconPath;
@@ -97,14 +92,13 @@ class CantoAssetSource implements AssetSourceInterface
      * @param string $assetSourceIdentifier
      * @param array $assetSourceOptions
      */
-    public function __construct(string $assetSourceIdentifier, array $assetSourceOptions)
+    public function __construct(string $assetSourceIdentifier, private array $assetSourceOptions)
     {
         if (preg_match('/^[a-z][a-z0-9-]{0,62}[a-z]$/', $assetSourceIdentifier) !== 1) {
             throw new \InvalidArgumentException(sprintf('Invalid asset source identifier "%s". The identifier must match /^[a-z][a-z0-9-]{0,62}[a-z]$/', $assetSourceIdentifier), 1607085585);
         }
 
         $this->assetSourceIdentifier = $assetSourceIdentifier;
-        $this->assetSourceOptions = $assetSourceOptions;
 
         foreach ($assetSourceOptions as $optionName => $optionValue) {
             switch ($optionName) {
@@ -150,27 +144,16 @@ class CantoAssetSource implements AssetSourceInterface
         }
     }
 
-    /**
-     * @param string $assetSourceIdentifier
-     * @param array $assetSourceOptions
-     * @return AssetSourceInterface
-     */
     public static function createFromConfiguration(string $assetSourceIdentifier, array $assetSourceOptions): AssetSourceInterface
     {
         return new static($assetSourceIdentifier, $assetSourceOptions);
     }
 
-    /**
-     * @return string
-     */
     public function getIdentifier(): string
     {
         return $this->assetSourceIdentifier;
     }
 
-    /**
-     * @return string
-     */
     public function getLabel(): string
     {
         return 'Canto';
@@ -188,49 +171,31 @@ class CantoAssetSource implements AssetSourceInterface
         return $this->assetProxyRepository;
     }
 
-    /**
-     * @return bool
-     */
     public function isReadOnly(): bool
     {
         return true;
     }
 
-    /**
-     * @return array
-     */
     public function getAssetSourceOptions(): array
     {
         return $this->assetSourceOptions;
     }
 
-    /**
-     * @return bool
-     */
     public function isAutoTaggingEnabled(): bool
     {
         return $this->autoTaggingEnabled;
     }
 
-    /**
-     * @return string
-     */
     public function getAutoTaggingInUseTag(): string
     {
         return $this->autoTaggingInUseTag;
     }
 
-    /**
-     * @return string
-     */
     public function getIconUri(): string
     {
         return $this->resourceManager->getPublicPackageResourceUriByPath($this->iconPath);
     }
 
-    /**
-     * @return string
-     */
     public function getDescription(): string
     {
         return $this->description;
@@ -251,9 +216,6 @@ class CantoAssetSource implements AssetSourceInterface
         return $this->appSecret;
     }
 
-    /**
-     * @return CantoClient
-     */
     public function getCantoClient(): CantoClient
     {
         if ($this->cantoClient === null) {

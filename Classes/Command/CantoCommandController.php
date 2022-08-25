@@ -58,7 +58,6 @@ class CantoCommandController extends CommandController
      *
      * @param string $assetSource Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
-     * @return void
      * @throws StopCommandException
      */
     public function tagUsedAssetsCommand(string $assetSource = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = false): void
@@ -129,7 +128,6 @@ class CantoCommandController extends CommandController
      *
      * @param string $assetSourceIdentifier Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
-     * @return void
      * @throws GuzzleException
      * @throws IllegalObjectTypeException
      * @throws OAuthClientException
@@ -151,7 +149,7 @@ class CantoCommandController extends CommandController
             $cantoAssetSource = $this->assetSourceService->getAssetSources()[$assetSourceIdentifier];
             $cantoClient = $cantoAssetSource->getCantoClient();
             $cantoClient->allowClientCredentialsAuthentication(true);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $this->outputLine('<error>Canto client could not be created</error>');
             $this->quit(1);
         }

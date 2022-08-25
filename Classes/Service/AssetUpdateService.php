@@ -121,7 +121,7 @@ final class AssetUpdateService
             $this->persistenceManager->persistAll();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -142,7 +142,7 @@ final class AssetUpdateService
             $this->persistenceManager->persistAll();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -195,9 +195,6 @@ final class AssetUpdateService
         }
     }
 
-    /**
-     * @return AssetSourceInterface|CantoAssetSource
-     */
     private function getAssetSource(): AssetSourceInterface
     {
         /** @var CantoAssetSource $assetSource */

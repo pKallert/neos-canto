@@ -22,10 +22,6 @@ use Neos\Flow\Persistence\Repository;
  */
 class AccountAuthorizationRepository extends Repository
 {
-    /**
-     * @param string $accountIdentifier
-     * @return AccountAuthorization|null
-     */
     public function findOneByFlowAccountIdentifier(string $accountIdentifier): ?AccountAuthorization
     {
         return $this->__call('findOneByFlowAccountIdentifier', [$accountIdentifier]);

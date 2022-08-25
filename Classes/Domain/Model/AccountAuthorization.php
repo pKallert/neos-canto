@@ -32,33 +32,21 @@ class AccountAuthorization
      */
     protected $authorizationId;
 
-    /**
-     * @return string
-     */
     public function getFlowAccountIdentifier(): string
     {
         return $this->flowAccountIdentifier;
     }
 
-    /**
-     * @param string $flowAccountIdentifier
-     */
     public function setFlowAccountIdentifier(string $flowAccountIdentifier): void
     {
         $this->flowAccountIdentifier = $flowAccountIdentifier;
     }
 
-    /**
-     * @return string
-     */
     public function getAuthorizationId(): string
     {
         return $this->authorizationId;
     }
 
-    /**
-     * @param string $authorizationId
-     */
     public function setAuthorizationId(string $authorizationId): void
     {
         $this->authorizationId = $authorizationId;

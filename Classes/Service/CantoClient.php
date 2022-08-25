@@ -48,26 +48,6 @@ final class CantoClient
     protected bool $allowClientCredentialsAuthentication = false;
 
     /**
-     * @var string
-     */
-    private $apiBaseUri;
-
-    /**
-     * @var string
-     */
-    protected $appId;
-
-    /**
-     * @var string
-     */
-    protected $appSecret;
-
-    /**
-     * @var string
-     */
-    private $serviceName;
-
-    /**
      * @Flow\Inject
      * @var Bootstrap
      */
@@ -107,13 +87,8 @@ final class CantoClient
      * @param string $appSecret
      * @param string $serviceName
      */
-    public function __construct(string $apiBaseUri, string $appId, string $appSecret, string $serviceName)
+    public function __construct(private string $apiBaseUri, protected string $appId, protected string $appSecret, private string $serviceName)
     {
-        $this->apiBaseUri = $apiBaseUri;
-        $this->appId = $appId;
-        $this->appSecret = $appSecret;
-        $this->serviceName = $serviceName;
-
         $this->httpClient = new Client(['allow_redirects' => true]);
     }
 
@@ -173,7 +148,7 @@ final class CantoClient
             return $rh->getHttpRequest()->getUri();
         }
 
-        throw new \RuntimeException(sprintf('Active request handler (%s) does not implement Neos\Flow\Http\HttpRequestHandlerInterface, could not determine request URI', get_class($rh)), 1632465274);
+        throw new \RuntimeException(sprintf('Active request handler (%s) does not implement Neos\Flow\Http\HttpRequestHandlerInterface, could not determine request URI', $rh::class), 1632465274);
     }
 
     private function redirectToUri(string $uri): void
@@ -183,8 +158,6 @@ final class CantoClient
     }
 
     /**
-     * @param string $assetProxyId
-     * @return ResponseInterface
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
@@ -200,9 +173,6 @@ final class CantoClient
     }
 
     /**
-     * @param string $id
-     * @param array $metadata
-     * @return ResponseInterface
      * @TODO Implement updateFile() method.
      */
     public function updateFile(string $id, array $metadata): ResponseInterface
@@ -211,13 +181,6 @@ final class CantoClient
     }
 
     /**
-     * @param string $keyword
-     * @param array $formatTypes
-     * @param string $customQueryPart
-     * @param int $offset
-     * @param int $limit
-     * @param array $orderings
-     * @return ResponseInterface
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
@@ -255,7 +218,6 @@ final class CantoClient
     }
 
     /**
-     * @return array
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
@@ -275,7 +237,6 @@ final class CantoClient
     }
 
     /**
-     * @return array
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
@@ -294,7 +255,6 @@ final class CantoClient
     }
 
     /**
-     * @return array
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
@@ -313,8 +273,6 @@ final class CantoClient
     }
 
     /**
-     * @param string $assetProxyId
-     * @return Uri|null
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
@@ -362,7 +320,6 @@ final class CantoClient
      * @param string $uriPathAndQuery A relative URI of the web server, prepended by the base URI
      * @param string $method The HTTP method, for example "GET" or "POST"
      * @param array $bodyFields Associative array of body fields to send (optional)
-     * @return RequestInterface
      * @throws OAuthClientException
      */
     private function getAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): RequestInterface
@@ -386,10 +343,6 @@ final class CantoClient
     /**
      * Sends an HTTP request to an OAuth 2.0 service provider using Bearer token authentication
      *
-     * @param string $uriPathAndQuery
-     * @param string $method
-     * @param array $bodyFields
-     * @return Response
      * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws HttpException
