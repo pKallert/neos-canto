@@ -8,7 +8,7 @@
         "ext-json": "*",
         "neos/flow": "^8.0 || dev-master",
         "neos/media": "^8.0 || dev-master",
-        "guzzlehttp/guzzle": "^7.0",
+        "guzzlehttp/guzzle": "^6.5.8 || ^7.4.5",
         "behat/transliterator": "~1.0",
         "flownative/oauth2-client": "^4.0.2"
     },
