@@ -182,6 +182,24 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
+     * @param Tag $tag
+     * @return int
+     */
+    public function countByTag(Tag $tag): int
+    {
+        $query = new CantoAssetProxyQuery($this->assetSource);
+        $query->setActiveTag($tag);
+        $query->setActiveAssetCollection($this->activeAssetCollection);
+        $query->setAssetTypeFilter($this->assetTypeFilter);
+        $query->setOrderings($this->orderings);
+        try {
+            return (new CantoAssetProxyQueryResult($query))->count();
+        } catch (AuthenticationFailedException|OAuthClientException|GuzzleException $e) {
+            return 0;
+        }
+    }
+
+    /**
      * @param AssetCollection|null $assetCollection
      */
     public function filterByCollection(AssetCollection $assetCollection = null): void
