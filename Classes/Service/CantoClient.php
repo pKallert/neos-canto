@@ -76,6 +76,11 @@ final class CantoClient
      */
     protected $accountAuthorizationRepository;
 
+    /**
+     * @var VariableFrontend $apiResponsesCache
+     */
+    protected $apiResponsesCache;
+
     public function __construct(private string $apiBaseUri, protected string $appId, protected string $appSecret, private string $serviceName)
     {
         $this->httpClient = new Client(['allow_redirects' => true]);
