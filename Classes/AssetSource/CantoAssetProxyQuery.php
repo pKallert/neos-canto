@@ -17,7 +17,6 @@ use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Utils;
 use Neos\Cache\Exception as CacheException;
 use Neos\Cache\Exception\InvalidDataException;
 use Neos\Flow\Annotations as Flow;
@@ -25,7 +24,6 @@ use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
 use Neos\Media\Domain\Model\Tag;
-use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface as SystemLoggerInterface;
 
 /**
@@ -178,11 +176,8 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     public function count(): int
     {
         $response = $this->sendSearchRequest(1, []);
-        $responseObject = $response->getBody();
-        if ($responseObject instanceof StreamInterface) {
-            $responseObject = $responseObject->getContents();
-        }
-        $responseObject = Utils::jsonDecode($responseObject);
+        $responseContent = $response->getBody()->getContents();
+        $responseObject = json_decode($responseContent, false, 512, JSON_THROW_ON_ERROR);
         return $responseObject->found ?? 0;
     }
 
@@ -198,17 +193,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     {
         $assetProxies = [];
         $response = $this->sendSearchRequest($this->limit, $this->orderings);
-        $responseContent = $response->getBody();
-        if ($responseContent instanceof StreamInterface) {
-            $responseContent = $responseContent->getContents();
-        }
-        $responseObject = Utils::jsonDecode($responseContent);
+        $responseContent = $response->getBody()->getContents();
+        $responseObject = json_decode($responseContent, false, 512, JSON_THROW_ON_ERROR);
 
         if (isset($responseObject->results) && is_array($responseObject->results)) {
             foreach ($responseObject->results as $rawAsset) {
                 $assetIdentifier = $rawAsset->scheme . '-' . $rawAsset->id;
 
-                $this->assetSource->getAssetProxyCache()->set($assetIdentifier, Utils::jsonEncode($rawAsset, JSON_FORCE_OBJECT));
+                $this->assetSource->getAssetProxyCache()->set($assetIdentifier, json_encode($rawAsset, JSON_THROW_ON_ERROR | JSON_FORCE_OBJECT));
 
                 $assetProxies[] = CantoAssetProxy::fromJsonObject($rawAsset, $this->assetSource);
             }

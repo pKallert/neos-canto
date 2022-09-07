@@ -25,7 +25,6 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
-use GuzzleHttp\Utils;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Core\Bootstrap;
@@ -232,7 +231,7 @@ final class CantoClient
     {
         $response = $this->sendAuthenticatedRequest('custom/field');
         if ($response->getStatusCode() === 200) {
-            return Utils::jsonDecode($response->getBody()->getContents());
+            return json_decode($response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR);
         }
         return [];
     }
@@ -250,7 +249,7 @@ final class CantoClient
     {
         $response = $this->sendAuthenticatedRequest('user');
         if ($response->getStatusCode() === 200) {
-            return Utils::jsonDecode($response->getBody()->getContents(), true);
+            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         }
         return [];
     }
@@ -268,7 +267,7 @@ final class CantoClient
     {
         $response = $this->sendAuthenticatedRequest('tree');
         if ($response->getStatusCode() === 200) {
-            return Utils::jsonDecode($response->getBody()->getContents(), true);
+            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         }
         return [];
     }
@@ -337,7 +336,7 @@ final class CantoClient
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $authorization->getAccessToken()
             ],
-            ($bodyFields !== [] ? Utils::jsonEncode($bodyFields) : '')
+            ($bodyFields !== [] ? json_encode($bodyFields, JSON_THROW_ON_ERROR) : '')
         );
     }
 
