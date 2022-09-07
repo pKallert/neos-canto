@@ -20,8 +20,12 @@ use Flownative\OAuth2\Client\OAuthClient;
 use Flownative\OAuth2\Client\OAuthClientException;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Exception;
 use Neos\Flow\Http\Helper\UriHelper;
+use Neos\Flow\Http\RequestHandler;
 use Neos\Flow\Mvc\ActionRequest;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
+use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Security\Context;
 use Psr\Http\Message\UriInterface;
@@ -86,6 +90,10 @@ class CantoOAuthClient extends OAuthClient
         throw new \RuntimeException('not implemented');
     }
 
+    /**
+     * @throws Exception
+     * @throws MissingActionNameException
+     */
     protected function createOAuthProvider(string $clientId, string $clientSecret): GenericProvider
     {
         return new CantoOAuthProvider([
@@ -100,6 +108,10 @@ class CantoOAuthClient extends OAuthClient
         ]);
     }
 
+    /**
+     * @throws Exception
+     * @throws MissingActionNameException
+     */
     public function renderFinishAuthorizationUri(): string
     {
         if (FLOW_SAPITYPE === 'CLI') {
@@ -122,11 +134,16 @@ class CantoOAuthClient extends OAuthClient
         );
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws IllegalObjectTypeException
+     * @throws \JsonException
+     */
     public function finishAuthorization(string $stateIdentifier, string $code, string $scope): UriInterface
     {
         $stateFromCache = $this->stateCache->get($stateIdentifier);
         if (empty($stateFromCache)) {
-            throw new OAuthClientException(sprintf('OAuth2 (%s): Finishing authorization failed because oAuth state %s could not be retrieved from the state cache.', CantoOAuthClient::getServiceType(), $stateIdentifier), 1627046882);
+            throw new OAuthClientException(sprintf('OAuth2 (%s): Finishing authorization failed because oAuth state %s could not be retrieved from the state cache.', self::getServiceType(), $stateIdentifier), 1627046882);
         }
 
         $authorizationId = $stateFromCache['authorizationId'];
@@ -149,7 +166,7 @@ class CantoOAuthClient extends OAuthClient
         $accountAuthorization->setAuthorizationId($authorizationId);
         $this->persistenceManager->allowObject($accountAuthorization);
 
-        $queryParameterName = CantoOAuthClient::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
+        $queryParameterName = self::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
         $queryParameters = UriHelper::parseQueryIntoArguments($returnUri);
         unset($queryParameters[$queryParameterName]);
         return UriHelper::uriWithArguments($returnUri, $queryParameters);

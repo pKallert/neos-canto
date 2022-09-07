@@ -7,11 +7,15 @@ use Flownative\Canto\AssetSource\CantoAssetProxy;
 use Flownative\Canto\AssetSource\CantoAssetProxyRepository;
 use Flownative\Canto\AssetSource\CantoAssetSource;
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 use Neos\Flow\Cli\Exception\StopCommandException;
+use Neos\Flow\Http\Exception;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Media\Domain\Model\Asset;
 use Neos\Media\Domain\Model\AssetCollection;
@@ -51,7 +55,7 @@ class CantoCommandController extends CommandController
      * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
      * @var array
      */
-    protected $mapping = [];
+    protected array $mapping = [];
 
     /**
      * Tag used assets
@@ -76,8 +80,6 @@ class CantoCommandController extends CommandController
             $this->quit(1);
         }
 
-        $assetProxyRepository = $cantoAssetSource->getAssetProxyRepository();
-        assert($assetProxyRepository instanceof CantoAssetProxyRepository);
         $cantoAssetSource->getAssetProxyCache()->flush();
 
         foreach ($this->assetRepository->iterate($iterator) as $asset) {
@@ -128,11 +130,16 @@ class CantoCommandController extends CommandController
      *
      * @param string $assetSourceIdentifier Name of the canto asset source
      * @param bool $quiet If set, only errors will be displayed.
+     * @throws AuthenticationFailedException
      * @throws GuzzleException
      * @throws IllegalObjectTypeException
      * @throws OAuthClientException
      * @throws StopCommandException
-     * @throws AuthenticationFailedException
+     * @throws MissingClientSecretException
+     * @throws \JsonException
+     * @throws IdentityProviderException
+     * @throws Exception
+     * @throws MissingActionNameException
      */
     public function importCustomFieldsAsCollectionsAndTagsCommand(string $assetSourceIdentifier = CantoAssetSource::ASSET_SOURCE_IDENTIFIER, bool $quiet = true): void
     {

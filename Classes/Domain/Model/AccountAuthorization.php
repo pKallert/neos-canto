@@ -25,12 +25,12 @@ class AccountAuthorization
      * @Identity()
      * @var string
      */
-    protected $flowAccountIdentifier;
+    protected string $flowAccountIdentifier;
 
     /**
      * @var string
      */
-    protected $authorizationId;
+    protected string $authorizationId;
 
     public function getFlowAccountIdentifier(): string
     {

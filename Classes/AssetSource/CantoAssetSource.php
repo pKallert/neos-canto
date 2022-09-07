@@ -27,55 +27,16 @@ class CantoAssetSource implements AssetSourceInterface
 {
     public const ASSET_SOURCE_IDENTIFIER = 'flownative-canto';
 
-    /**
-     * @var bool
-     */
-    private $autoTaggingEnabled = false;
-
-    /**
-     * @var string
-     */
-    private $autoTaggingInUseTag = 'used-by-neos';
-
-    /**
-     * @var string
-     */
-    private $assetSourceIdentifier;
-
-    /**
-     * @var CantoAssetProxyRepository
-     */
-    private $assetProxyRepository;
-
-    /**
-     * @var string
-     */
-    private $apiBaseUri;
-
-    /**
-     * @var string
-     */
-    private $appId;
-
-    /**
-     * @var string
-     */
-    private $appSecret;
-
-    /**
-     * @var CantoClient
-     */
-    private $cantoClient;
-
-    /**
-     * @var string
-     */
-    private $iconPath;
-
-    /**
-     * @var string
-     */
-    private $description;
+    private bool $autoTaggingEnabled = false;
+    private string $autoTaggingInUseTag = 'used-by-neos';
+    private string $assetSourceIdentifier;
+    private ?CantoAssetProxyRepository $assetProxyRepository = null;
+    private string $apiBaseUri;
+    private string $appId = '';
+    private string $appSecret = '';
+    private ?CantoClient $cantoClient = null;
+    private string $iconPath;
+    private string $description;
 
     /**
      * @Flow\Inject
@@ -88,10 +49,6 @@ class CantoAssetSource implements AssetSourceInterface
      */
     protected $assetProxyCache;
 
-    /**
-     * @param string $assetSourceIdentifier
-     * @param array $assetSourceOptions
-     */
     public function __construct(string $assetSourceIdentifier, private array $assetSourceOptions)
     {
         if (preg_match('/^[a-z][a-z0-9-]{0,62}[a-z]$/', $assetSourceIdentifier) !== 1) {
@@ -139,7 +96,7 @@ class CantoAssetSource implements AssetSourceInterface
             }
         }
 
-        if ($this->appId === null || $this->appSecret === null) {
+        if ($this->appId === '' || $this->appSecret === '') {
             throw new \InvalidArgumentException(sprintf('No app id or app secret specified for Canto asset source "%s".', $assetSourceIdentifier), 1632468673);
         }
     }
@@ -159,10 +116,7 @@ class CantoAssetSource implements AssetSourceInterface
         return 'Canto';
     }
 
-    /**
-     * @return CantoAssetProxyRepository
-     */
-    public function getAssetProxyRepository(): AssetProxyRepositoryInterface
+    public function getAssetProxyRepository(): AssetProxyRepositoryInterface|CantoAssetProxyRepository
     {
         if ($this->assetProxyRepository === null) {
             $this->assetProxyRepository = new CantoAssetProxyRepository($this);

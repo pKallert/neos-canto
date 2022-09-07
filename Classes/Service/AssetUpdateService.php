@@ -14,13 +14,18 @@ namespace Flownative\Canto\Service;
  */
 
 use Flownative\Canto\AssetSource\CantoAssetSource;
+use Flownative\Canto\Exception\AssetNotFoundException;
+use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
+use Neos\Cache\Exception;
+use Neos\Cache\Exception\InvalidDataException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Log\Utility\LogEnvironment;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\ResourceManagement\ResourceManager;
 use Neos\Media\Domain\Model\AssetInterface;
-use Neos\Media\Domain\Model\AssetSource\AssetSourceInterface;
 use Neos\Media\Domain\Model\ImageVariant;
 use Neos\Media\Domain\Repository\AssetRepository;
 use Neos\Media\Domain\Repository\ImportedAssetRepository;
@@ -121,7 +126,7 @@ final class AssetUpdateService
             $this->persistenceManager->persistAll();
 
             return true;
-        } catch (\Exception) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -142,11 +147,20 @@ final class AssetUpdateService
             $this->persistenceManager->persistAll();
 
             return true;
-        } catch (\Exception) {
+        } catch (\Throwable) {
             return false;
         }
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws AssetNotFoundException
+     * @throws \Neos\Flow\ResourceManagement\Exception
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     private function replaceAsset(string $identifier): void
     {
         $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier(CantoAssetSource::ASSET_SOURCE_IDENTIFIER, $identifier);
@@ -166,7 +180,7 @@ final class AssetUpdateService
             $proxy = $this->getAssetSource()->getAssetProxyRepository()->getAssetProxy($identifier);
             $newResource = $this->resourceManager->importResource($proxy->getImportStream());
         } catch (\Exception $e) {
-            $this->logger->debug(sprintf('Could not import resource for asset %s from %s, exception: %s', $localAssetIdentifier, $identifier, $this->throwableStorage->logThrowable($e)), LogEnvironment::fromMethodName(__METHOD__));;
+            $this->logger->debug(sprintf('Could not import resource for asset %s from %s, exception: %s', $localAssetIdentifier, $identifier, $this->throwableStorage->logThrowable($e)), LogEnvironment::fromMethodName(__METHOD__));
             throw $e;
         }
         $newResource->setFilename($proxy->getFilename());
@@ -174,7 +188,7 @@ final class AssetUpdateService
         $this->logger->debug(sprintf('Replaced resource %s with %s on asset %s from Canto asset %s', $localAsset->getResource()->getSha1(), $newResource->getSha1(), $localAssetIdentifier, $identifier), LogEnvironment::fromMethodName(__METHOD__));
 
         // … to delete it here!
-        $this->logger->debug(sprintf('Trying to delete replaced resource: %s (%s)', $previousResource->getFilename(), $previousResource->getSha1()), LogEnvironment::fromMethodName(__METHOD__));;
+        $this->logger->debug(sprintf('Trying to delete replaced resource: %s (%s)', $previousResource->getFilename(), $previousResource->getSha1()), LogEnvironment::fromMethodName(__METHOD__));
         $this->resourceManager->deleteResource($previousResource);
     }
 
@@ -195,7 +209,7 @@ final class AssetUpdateService
         }
     }
 
-    private function getAssetSource(): AssetSourceInterface
+    private function getAssetSource(): CantoAssetSource
     {
         /** @var CantoAssetSource $assetSource */
         $assetSource = $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER];

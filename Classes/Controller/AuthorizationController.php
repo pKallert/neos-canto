@@ -18,7 +18,11 @@ use Flownative\Canto\Service\CantoOAuthClient;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Exception;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\Mvc\Exception\UnsupportedRequestTypeException;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
+use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\Flow\Security\Context;
 use Neos\Media\Domain\Service\AssetSourceService;
 
@@ -36,12 +40,23 @@ class AuthorizationController extends ActionController
      */
     protected $assetSourceService;
 
+    /**
+     * @throws Exception
+     * @throws MissingActionNameException
+     */
     public function neededAction(string $returnUri): void
     {
         $this->view->assign('startUri', $this->uriBuilder->uriFor('start'));
         $this->view->assign('returnUri', $returnUri);
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws MissingActionNameException
+     * @throws Exception
+     * @throws UnsupportedRequestTypeException
+     * @throws \JsonException
+     */
     public function startAction(): void
     {
         $appId = $this->assetSourceService->getAssetSources()[CantoAssetSource::ASSET_SOURCE_IDENTIFIER]->getAppId();
@@ -73,6 +88,8 @@ class AuthorizationController extends ActionController
      * Finish OAuth2 authorization
      *
      * @throws OAuthClientException
+     * @throws \JsonException
+     * @throws IllegalObjectTypeException
      */
     public function finishAction(string $state, string $code, string $scope = ''): void
     {

@@ -26,6 +26,8 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Neos\Cache\Exception;
+use Neos\Cache\Frontend\VariableFrontend;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Core\Bootstrap;
 use Neos\Flow\Http\Exception as HttpException;
@@ -46,6 +48,9 @@ use Psr\Http\Message\UriInterface;
 final class CantoClient
 {
     protected bool $allowClientCredentialsAuthentication = false;
+
+    private ?Authorization $authorization = null;
+    private Client $httpClient;
 
     /**
      * @Flow\Inject
@@ -71,22 +76,6 @@ final class CantoClient
      */
     protected $accountAuthorizationRepository;
 
-    /**
-     * @var Authorization
-     */
-    private $authorization;
-
-    /**
-     * @var Client
-     */
-    private $httpClient;
-
-    /**
-     * @param string $apiBaseUri
-     * @param string $appId
-     * @param string $appSecret
-     * @param string $serviceName
-     */
     public function __construct(private string $apiBaseUri, protected string $appId, protected string $appSecret, private string $serviceName)
     {
         $this->httpClient = new Client(['allow_redirects' => true]);
@@ -165,6 +154,7 @@ final class CantoClient
      * @throws MissingClientSecretException
      * @throws OAuthClientException
      * @throws IdentityProviderException
+     * @throws \JsonException
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
@@ -188,6 +178,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function search(string $keyword, array $formatTypes, string $customQueryPart = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
@@ -225,13 +216,21 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
-     * @todo perhaps cache the result
+     * @throws \JsonException
+     * @throws Exception
      */
     public function getCustomFields(): array
     {
+        $cacheEntry = $this->apiResponsesCache->get('customFields');
+        if ($cacheEntry !== false) {
+            return $cacheEntry;
+        }
+
         $response = $this->sendAuthenticatedRequest('custom/field');
         if ($response->getStatusCode() === 200) {
-            return json_decode($response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR);
+            $customFields = json_decode($response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR);
+            $this->apiResponsesCache->set('customFields', $customFields);
+            return $customFields;
         }
         return [];
     }
@@ -244,6 +243,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function user(): array
     {
@@ -262,6 +262,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function tree(): array
     {
@@ -316,11 +317,8 @@ final class CantoClient
     /**
      * Returns a prepared request to an OAuth 2.0 service provider using Bearer token authentication
      *
-     * @param Authorization $authorization
-     * @param string $uriPathAndQuery A relative URI of the web server, prepended by the base URI
-     * @param string $method The HTTP method, for example "GET" or "POST"
-     * @param array $bodyFields Associative array of body fields to send (optional)
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     private function getAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): RequestInterface
     {
@@ -350,6 +348,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
     {

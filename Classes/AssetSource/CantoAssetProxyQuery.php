@@ -14,12 +14,16 @@ namespace Flownative\Canto\AssetSource;
  */
 
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Cache\Exception as CacheException;
 use Neos\Cache\Exception\InvalidDataException;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Exception;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
@@ -31,51 +35,19 @@ use Psr\Log\LoggerInterface as SystemLoggerInterface;
  */
 final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 {
-    /**
-     * @var string
-     */
-    private $searchTerm = '';
-
-    /**
-     * @var Tag
-     */
-    private $activeTag;
-
-    /**
-     * @var string
-     */
-    private $tagQuery = '';
-
-    /**
-     * @var AssetCollection
-     */
-    private $activeAssetCollection;
-
-    /**
-     * @var string
-     */
-    private $assetTypeFilter = 'All';
-
-    /**
-     * @var array
-     */
-    private $orderings = [];
-
-    /**
-     * @var int
-     */
-    private $offset = 0;
-
-    /**
-     * @var int
-     */
-    private $limit = 30;
+    private string $searchTerm = '';
+    private ?Tag $activeTag = null;
+    private string $tagQuery = '';
+    private ?AssetCollection $activeAssetCollection = null;
+    private string $assetTypeFilter = 'All';
+    private array $orderings = [];
+    private int $offset = 0;
+    private int $limit = 30;
 
     /**
      * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
-     * @var array
      */
-    protected $mapping = [];
+    protected array $mapping = [];
 
     /**
      * @Flow\Inject
@@ -83,9 +55,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     protected $logger;
 
-    /**
-     * @param CantoAssetSource $assetSource
-     */
     public function __construct(private CantoAssetSource $assetSource)
     {
     }
@@ -169,9 +138,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function count(): int
     {
@@ -188,6 +162,8 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @throws CacheException
      * @throws InvalidDataException
      * @throws AuthenticationFailedException
+     * @throws \JsonException
+     * @throws \Exception
      */
     public function getArrayResult(): array
     {
@@ -209,9 +185,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     private function sendSearchRequest(int $limit, array $orderings): Response
     {
@@ -221,31 +202,25 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
         $searchTerm = $this->searchTerm;
 
-        switch ($this->assetTypeFilter) {
-            case 'Image':
-                $formatTypes = ['image'];
-            break;
-            case 'Video':
-                $formatTypes = ['video'];
-            break;
-            case 'Audio':
-                $formatTypes = ['audio'];
-            break;
-            case 'Document':
-                $formatTypes = ['document'];
-            break;
-            case 'All':
-            default:
-                $formatTypes = ['image', 'video', 'audio', 'document', 'presentation', 'other'];
-            break;
-        }
+        $formatTypes = match ($this->assetTypeFilter) {
+            'Image' => ['image'],
+            'Video' => ['video'],
+            'Audio' => ['audio'],
+            'Document' => ['document'],
+            default => ['image', 'video', 'audio', 'document', 'presentation', 'other'],
+        };
         return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->tagQuery, $this->offset, $limit, $orderings);
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function prepareTagQuery(): void
     {
@@ -276,9 +251,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws GuzzleException
+     * @throws OAuthClientException
+     * @throws MissingClientSecretException
+     * @throws \JsonException
+     * @throws IdentityProviderException
+     * @throws Exception
+     * @throws MissingActionNameException
      */
     public function prepareUntaggedQuery(): void
     {
