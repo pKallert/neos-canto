@@ -47,6 +47,9 @@ final class CantoClient
 {
     protected bool $allowClientCredentialsAuthentication = false;
 
+    private ?Authorization $authorization = null;
+    private Client $httpClient;
+
     /**
      * @Flow\Inject
      * @var Bootstrap
@@ -71,22 +74,6 @@ final class CantoClient
      */
     protected $accountAuthorizationRepository;
 
-    /**
-     * @var Authorization
-     */
-    private $authorization;
-
-    /**
-     * @var Client
-     */
-    private $httpClient;
-
-    /**
-     * @param string $apiBaseUri
-     * @param string $appId
-     * @param string $appSecret
-     * @param string $serviceName
-     */
     public function __construct(private string $apiBaseUri, protected string $appId, protected string $appSecret, private string $serviceName)
     {
         $this->httpClient = new Client(['allow_redirects' => true]);
@@ -316,10 +303,6 @@ final class CantoClient
     /**
      * Returns a prepared request to an OAuth 2.0 service provider using Bearer token authentication
      *
-     * @param Authorization $authorization
-     * @param string $uriPathAndQuery A relative URI of the web server, prepended by the base URI
-     * @param string $method The HTTP method, for example "GET" or "POST"
-     * @param array $bodyFields Associative array of body fields to send (optional)
      * @throws OAuthClientException
      */
     private function getAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): RequestInterface

@@ -36,27 +36,13 @@ use Psr\Http\Message\StreamInterface;
  */
 class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, SupportsSortingInterface, SupportsTaggingInterface, SupportsCollectionsInterface
 {
-    /**
-     * @var AssetCollection
-     */
-    private $activeAssetCollection;
+    private ?AssetCollection $activeAssetCollection = null;
+    private string $assetTypeFilter = 'All';
+    private array $orderings = [];
 
-    /**
-     * @param CantoAssetSource $assetSource
-     */
     public function __construct(private CantoAssetSource $assetSource)
     {
     }
-
-    /**
-     * @var string
-     */
-    private $assetTypeFilter = 'All';
-
-    /**
-     * @var array
-     */
-    private $orderings = [];
 
     /**
      * @throws AssetNotFoundException
@@ -90,9 +76,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         return CantoAssetProxy::fromJsonObject($responseObject, $this->assetSource);
     }
 
-    /**
-     * @param AssetTypeFilter|null $assetType
-     */
     public function filterByType(AssetTypeFilter $assetType = null): void
     {
         $this->assetTypeFilter = (string)$assetType ?: 'All';
@@ -147,8 +130,7 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      */
     public function countAll(): int
     {
-        $query = new CantoAssetProxyQuery($this->assetSource);
-        return $query->count();
+        return (new CantoAssetProxyQuery($this->assetSource))->count();
     }
 
     /**
@@ -181,10 +163,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         return $query->count();
     }
 
-    /**
-     * @param Tag $tag
-     * @return int
-     */
     public function countByTag(Tag $tag): int
     {
         try {
@@ -194,9 +172,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         }
     }
 
-    /**
-     * @param AssetCollection|null $assetCollection
-     */
     public function filterByCollection(AssetCollection $assetCollection = null): void
     {
         $this->activeAssetCollection = $assetCollection;

@@ -126,7 +126,7 @@ class CantoOAuthClient extends OAuthClient
     {
         $stateFromCache = $this->stateCache->get($stateIdentifier);
         if (empty($stateFromCache)) {
-            throw new OAuthClientException(sprintf('OAuth2 (%s): Finishing authorization failed because oAuth state %s could not be retrieved from the state cache.', CantoOAuthClient::getServiceType(), $stateIdentifier), 1627046882);
+            throw new OAuthClientException(sprintf('OAuth2 (%s): Finishing authorization failed because oAuth state %s could not be retrieved from the state cache.', self::getServiceType(), $stateIdentifier), 1627046882);
         }
 
         $authorizationId = $stateFromCache['authorizationId'];
@@ -149,7 +149,7 @@ class CantoOAuthClient extends OAuthClient
         $accountAuthorization->setAuthorizationId($authorizationId);
         $this->persistenceManager->allowObject($accountAuthorization);
 
-        $queryParameterName = CantoOAuthClient::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
+        $queryParameterName = self::generateAuthorizationIdQueryParameterName(CantoAssetSource::ASSET_SOURCE_IDENTIFIER);
         $queryParameters = UriHelper::parseQueryIntoArguments($returnUri);
         unset($queryParameters[$queryParameterName]);
         return UriHelper::uriWithArguments($returnUri, $queryParameters);

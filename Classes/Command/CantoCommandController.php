@@ -51,7 +51,7 @@ class CantoCommandController extends CommandController
      * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
      * @var array
      */
-    protected $mapping = [];
+    protected array $mapping = [];
 
     /**
      * Tag used assets

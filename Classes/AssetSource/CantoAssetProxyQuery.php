@@ -31,51 +31,19 @@ use Psr\Log\LoggerInterface as SystemLoggerInterface;
  */
 final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 {
-    /**
-     * @var string
-     */
-    private $searchTerm = '';
-
-    /**
-     * @var Tag
-     */
-    private $activeTag;
-
-    /**
-     * @var string
-     */
-    private $tagQuery = '';
-
-    /**
-     * @var AssetCollection
-     */
-    private $activeAssetCollection;
-
-    /**
-     * @var string
-     */
-    private $assetTypeFilter = 'All';
-
-    /**
-     * @var array
-     */
-    private $orderings = [];
-
-    /**
-     * @var int
-     */
-    private $offset = 0;
-
-    /**
-     * @var int
-     */
-    private $limit = 30;
+    private string $searchTerm = '';
+    private ?Tag $activeTag = null;
+    private string $tagQuery = '';
+    private ?AssetCollection $activeAssetCollection = null;
+    private string $assetTypeFilter = 'All';
+    private array $orderings = [];
+    private int $offset = 0;
+    private int $limit = 30;
 
     /**
      * @Flow\InjectConfiguration(path="mapping", package="Flownative.Canto")
-     * @var array
      */
-    protected $mapping = [];
+    protected array $mapping = [];
 
     /**
      * @Flow\Inject
@@ -83,9 +51,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      */
     protected $logger;
 
-    /**
-     * @param CantoAssetSource $assetSource
-     */
     public function __construct(private CantoAssetSource $assetSource)
     {
     }
@@ -221,24 +186,13 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 
         $searchTerm = $this->searchTerm;
 
-        switch ($this->assetTypeFilter) {
-            case 'Image':
-                $formatTypes = ['image'];
-            break;
-            case 'Video':
-                $formatTypes = ['video'];
-            break;
-            case 'Audio':
-                $formatTypes = ['audio'];
-            break;
-            case 'Document':
-                $formatTypes = ['document'];
-            break;
-            case 'All':
-            default:
-                $formatTypes = ['image', 'video', 'audio', 'document', 'presentation', 'other'];
-            break;
-        }
+        $formatTypes = match ($this->assetTypeFilter) {
+            'Image' => ['image'],
+            'Video' => ['video'],
+            'Audio' => ['audio'],
+            'Document' => ['document'],
+            default => ['image', 'video', 'audio', 'document', 'presentation', 'other'],
+        };
         return $this->assetSource->getCantoClient()->search($searchTerm, $formatTypes, $this->tagQuery, $this->offset, $limit, $orderings);
     }
 

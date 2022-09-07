@@ -27,24 +27,10 @@ use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
  */
 class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
 {
-    /**
-     * @var array
-     */
-    private $assetProxies;
+    private ?array $assetProxies = null;
+    private ?int $numberOfAssetProxies = null;
+    private \ArrayIterator $assetProxiesIterator;
 
-    /**
-     * @var int
-     */
-    private $numberOfAssetProxies;
-
-    /**
-     * @var \ArrayIterator
-     */
-    private $assetProxiesIterator;
-
-    /**
-     * @param CantoAssetProxyQuery $query
-     */
     public function __construct(private CantoAssetProxyQuery $query)
     {
     }

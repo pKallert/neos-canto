@@ -36,65 +36,18 @@ use stdClass;
  */
 final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInterface, SupportsIptcMetadataInterface
 {
-    /**
-     * @var CantoAssetSource
-     */
-    private $assetSource;
-
-    /**
-     * @var string
-     */
-    private $identifier;
-
-    /**
-     * @var string
-     */
-    private $label;
-
-    /**
-     * @var string
-     */
-    private $filename;
-
-    /**
-     * @var \DateTime
-     */
-    private $lastModified;
-
-    /**
-     * @var int
-     */
-    private $fileSize;
-
-    /**
-     * @var string
-     */
-    private $mediaType;
-
-    /**
-     * @var array
-     */
-    private $iptcProperties = [];
-
-    /**
-     * @var string
-     */
-    private $previewUri;
-
-    /**
-     * @var int
-     */
-    private $widthInPixels;
-
-    /**
-     * @var int
-     */
-    private $heightInPixels;
-
-    /**
-     * @var array
-     */
-    private $tags = [];
+    private CantoAssetSource $assetSource;
+    private string $identifier;
+    private string $label;
+    private string $filename;
+    private \DateTime $lastModified;
+    private int $fileSize;
+    private string $mediaType;
+    private array $iptcProperties = [];
+    private string $previewUri;
+    private int $widthInPixels;
+    private int $heightInPixels;
+    private array $tags = [];
 
     /**
      * @Flow\Inject
@@ -198,7 +151,6 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     }
 
     /**
-     * @return UriInterface
      * @throws ThumbnailServiceException
      */
     public function getThumbnailUri(): ?UriInterface
@@ -206,13 +158,12 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $thumbnailConfiguration = $this->thumbnailService->getThumbnailConfigurationForPreset('Neos.Media.Browser:Thumbnail');
         return new Uri(sprintf(
             '%s/%d',
-            preg_replace('|/[0-9]+$|', '', $this->previewUri),
+            preg_replace('|/\d+$|', '', $this->previewUri),
             max($thumbnailConfiguration->getMaximumWidth(), $thumbnailConfiguration->getMaximumHeight())
         ));
     }
 
     /**
-     * @return UriInterface
      * @throws ThumbnailServiceException
      */
     public function getPreviewUri(): ?UriInterface
@@ -220,7 +171,7 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         $previewConfiguration = $this->thumbnailService->getThumbnailConfigurationForPreset('Neos.Media.Browser:Preview');
         return new Uri(sprintf(
             '%s/%d',
-            preg_replace('|/[0-9]+$|', '', $this->previewUri),
+            preg_replace('|/\d+$|', '', $this->previewUri),
             max($previewConfiguration->getMaximumWidth(), $previewConfiguration->getMaximumHeight())
         ));
     }
@@ -236,9 +187,6 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         return fopen((string)$this->assetSource->getCantoClient()->directUri($this->identifier), 'rb');
     }
 
-    /**
-     * @return string
-     */
     public function getLocalAssetIdentifier(): ?string
     {
         $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier($this->assetSource->getIdentifier(), $this->identifier);
