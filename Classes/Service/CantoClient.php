@@ -152,6 +152,7 @@ final class CantoClient
      * @throws MissingClientSecretException
      * @throws OAuthClientException
      * @throws IdentityProviderException
+     * @throws \JsonException
      */
     public function getFile(string $assetProxyId): ResponseInterface
     {
@@ -175,6 +176,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function search(string $keyword, array $formatTypes, string $customQueryPart = '', int $offset = 0, int $limit = 50, array $orderings = []): ResponseInterface
     {
@@ -212,6 +214,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      * @todo perhaps cache the result
      */
     public function getCustomFields(): array
@@ -231,6 +234,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function user(): array
     {
@@ -249,6 +253,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function tree(): array
     {
@@ -304,6 +309,7 @@ final class CantoClient
      * Returns a prepared request to an OAuth 2.0 service provider using Bearer token authentication
      *
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     private function getAuthenticatedRequest(Authorization $authorization, string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): RequestInterface
     {
@@ -333,6 +339,7 @@ final class CantoClient
      * @throws MissingActionNameException
      * @throws MissingClientSecretException
      * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function sendAuthenticatedRequest(string $uriPathAndQuery, string $method = 'GET', array $bodyFields = []): Response
     {

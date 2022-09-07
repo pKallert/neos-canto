@@ -15,11 +15,15 @@ namespace Flownative\Canto\AssetSource;
 
 use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Utils;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Cache\Exception as CacheException;
 use Neos\Cache\Exception\InvalidDataException;
+use Neos\Flow\Http\Exception;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
@@ -109,9 +113,15 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
+     * @return AssetProxyQueryResultInterface
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function findUntagged(): AssetProxyQueryResultInterface
     {
@@ -124,9 +134,14 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function countAll(): int
     {
@@ -149,9 +164,14 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws GuzzleException
+     * @throws OAuthClientException
+     * @throws MissingClientSecretException
+     * @throws \JsonException
+     * @throws IdentityProviderException
+     * @throws Exception
+     * @throws MissingActionNameException
      */
     public function countUntagged(): int
     {

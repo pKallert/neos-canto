@@ -82,48 +82,104 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
         return $this->assetProxies;
     }
 
+    /**
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function current()
     {
         $this->initialize();
         return $this->assetProxiesIterator->current();
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function next()
     {
         $this->initialize();
         $this->assetProxiesIterator->next();
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function key()
     {
         $this->initialize();
         return $this->assetProxiesIterator->key();
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function valid(): bool
     {
         $this->initialize();
         return $this->assetProxiesIterator->valid();
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function rewind()
     {
         $this->initialize();
         $this->assetProxiesIterator->rewind();
     }
 
+    /**
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function offsetExists($offset): bool
     {
         $this->initialize();
         return $this->assetProxiesIterator->offsetExists($offset);
     }
 
+    /**
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function offsetGet($offset)
     {
         $this->initialize();
         return $this->assetProxiesIterator->offsetGet($offset);
     }
 
+    /**
+     * @throws AuthenticationFailedException
+     * @throws OAuthClientException
+     * @throws CacheException
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     public function offsetSet($offset, $value)
     {
         $this->initialize();

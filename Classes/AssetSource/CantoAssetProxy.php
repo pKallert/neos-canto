@@ -15,10 +15,13 @@ namespace Flownative\Canto\AssetSource;
 
 use Exception;
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Uri;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\AssetProxyInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\HasRemoteOriginalInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxy\SupportsIptcMetadataInterface;
@@ -179,8 +182,12 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     /**
      * @return resource
      * @throws AuthenticationFailedException
-     * @throws OAuthClientException
      * @throws GuzzleException
+     * @throws OAuthClientException
+     * @throws MissingClientSecretException
+     * @throws IdentityProviderException
+     * @throws \Neos\Flow\Http\Exception
+     * @throws MissingActionNameException
      */
     public function getImportStream()
     {

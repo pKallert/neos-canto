@@ -14,12 +14,16 @@ namespace Flownative\Canto\AssetSource;
  */
 
 use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\Canto\Exception\MissingClientSecretException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Cache\Exception as CacheException;
 use Neos\Cache\Exception\InvalidDataException;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Exception;
+use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Media\Domain\Model\AssetCollection;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryInterface;
 use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
@@ -134,9 +138,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function count(): int
     {
@@ -153,6 +162,8 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
      * @throws CacheException
      * @throws InvalidDataException
      * @throws AuthenticationFailedException
+     * @throws \JsonException
+     * @throws \Exception
      */
     public function getArrayResult(): array
     {
@@ -174,9 +185,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     private function sendSearchRequest(int $limit, array $orderings): Response
     {
@@ -197,9 +213,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws IdentityProviderException
+     * @throws MissingActionNameException
+     * @throws MissingClientSecretException
+     * @throws OAuthClientException
+     * @throws \JsonException
      */
     public function prepareTagQuery(): void
     {
@@ -230,9 +251,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @throws OAuthClientException
-     * @throws GuzzleException
      * @throws AuthenticationFailedException
+     * @throws GuzzleException
+     * @throws OAuthClientException
+     * @throws MissingClientSecretException
+     * @throws \JsonException
+     * @throws IdentityProviderException
+     * @throws Exception
+     * @throws MissingActionNameException
      */
     public function prepareUntaggedQuery(): void
     {

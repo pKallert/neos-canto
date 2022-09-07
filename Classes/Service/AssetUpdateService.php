@@ -14,6 +14,12 @@ namespace Flownative\Canto\Service;
  */
 
 use Flownative\Canto\AssetSource\CantoAssetSource;
+use Flownative\Canto\Exception\AssetNotFoundException;
+use Flownative\Canto\Exception\AuthenticationFailedException;
+use Flownative\OAuth2\Client\OAuthClientException;
+use GuzzleHttp\Exception\GuzzleException;
+use Neos\Cache\Exception;
+use Neos\Cache\Exception\InvalidDataException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Log\Utility\LogEnvironment;
@@ -146,6 +152,15 @@ final class AssetUpdateService
         }
     }
 
+    /**
+     * @throws OAuthClientException
+     * @throws AuthenticationFailedException
+     * @throws Exception
+     * @throws AssetNotFoundException
+     * @throws \Neos\Flow\ResourceManagement\Exception
+     * @throws GuzzleException
+     * @throws InvalidDataException
+     */
     private function replaceAsset(string $identifier): void
     {
         $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier(CantoAssetSource::ASSET_SOURCE_IDENTIFIER, $identifier);
