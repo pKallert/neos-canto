@@ -22,6 +22,7 @@ use GuzzleHttp\Utils;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Neos\Cache\Exception as CacheException;
 use Neos\Cache\Exception\InvalidDataException;
+use Neos\Cache\Frontend\VariableFrontend;
 use Neos\Flow\Http\Exception;
 use Neos\Flow\Mvc\Routing\Exception\MissingActionNameException;
 use Neos\Media\Domain\Model\AssetCollection;
@@ -43,6 +44,11 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     private ?AssetCollection $activeAssetCollection = null;
     private string $assetTypeFilter = 'All';
     private array $orderings = [];
+
+    /**
+     * @var VariableFrontend $apiResponsesCache
+     */
+    protected $apiResponsesCache;
 
     public function __construct(private CantoAssetSource $assetSource)
     {
@@ -185,11 +191,19 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
 
     public function countByTag(Tag $tag): int
     {
-        try {
-            return ($this->findByTag($tag))->count();
-        } catch (AuthenticationFailedException|OAuthClientException|GuzzleException $e) {
-            return 0;
+        $identifier = 'countByTag-' . sha1($tag->getLabel());
+        $cacheEntry = $this->apiResponsesCache->get($identifier);
+        if ($cacheEntry !== false) {
+            return $cacheEntry;
         }
+
+        try {
+            $count = $this->findByTag($tag)->count();
+            $this->apiResponsesCache->set($identifier, $count, ['countByTag']);
+            return $count;
+        } catch (AuthenticationFailedException|OAuthClientException|GuzzleException) {
+        }
+        return 0;
     }
 
     public function filterByCollection(AssetCollection $assetCollection = null): void
