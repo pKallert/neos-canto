@@ -76,8 +76,6 @@ class CantoCommandController extends CommandController
             $this->quit(1);
         }
 
-        $assetProxyRepository = $cantoAssetSource->getAssetProxyRepository();
-        assert($assetProxyRepository instanceof CantoAssetProxyRepository);
         $cantoAssetSource->getAssetProxyCache()->flush();
 
         foreach ($this->assetRepository->iterate($iterator) as $asset) {
