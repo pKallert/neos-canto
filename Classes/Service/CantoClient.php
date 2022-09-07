@@ -406,4 +406,28 @@ final class CantoClient
 
         return $this->httpClient->send($this->getAuthenticatedRequest($this->authorization, $uriPathAndQuery, $method, $bodyFields));
     }
+
+    /**
+     * Checks if the current account fetched from the security context has a valid access-token.
+     *
+     * If the security context is not initialized, no account is found or no valid access-token exists, false is returned.
+     *
+     * @return bool
+     */
+    public function isAuthenticated(): bool
+    {
+        $oAuthClient = new CantoOAuthClient($this->serviceName);
+
+        if ($this->securityContext->isInitialized()) {
+            $account = $this->securityContext->getAccount();
+            $accountAuthorization = $account ? $this->accountAuthorizationRepository->findOneByFlowAccountIdentifier($account->getAccountIdentifier()) : null;
+            $authorization = $accountAuthorization instanceof AccountAuthorization ? $oAuthClient->getAuthorization($accountAuthorization->getAuthorizationId()) : null;
+
+            if ($authorization !== null && ($authorization->getAccessToken() && !$authorization->getAccessToken()->hasExpired())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
