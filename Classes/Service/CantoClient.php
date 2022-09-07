@@ -26,6 +26,8 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Neos\Cache\Exception;
+use Neos\Cache\Frontend\VariableFrontend;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Core\Bootstrap;
 use Neos\Flow\Http\Exception as HttpException;
@@ -215,13 +217,20 @@ final class CantoClient
      * @throws MissingClientSecretException
      * @throws OAuthClientException
      * @throws \JsonException
-     * @todo perhaps cache the result
+     * @throws Exception
      */
     public function getCustomFields(): array
     {
+        $cacheEntry = $this->apiResponsesCache->get('customFields');
+        if ($cacheEntry !== false) {
+            return $cacheEntry;
+        }
+
         $response = $this->sendAuthenticatedRequest('custom/field');
         if ($response->getStatusCode() === 200) {
-            return json_decode($response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR);
+            $customFields = json_decode($response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR);
+            $this->apiResponsesCache->set('customFields', $customFields);
+            return $customFields;
         }
         return [];
     }
