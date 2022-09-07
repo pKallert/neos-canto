@@ -27,7 +27,6 @@ final class CantoOAuthProvider extends GenericProvider
      * Requests an access token using a specified grant and option set.
      *
      * @param mixed $grant
-     * @param array $options
      * @return AccessTokenInterface
      * @throws IdentityProviderException
      */

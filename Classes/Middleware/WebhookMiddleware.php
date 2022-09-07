@@ -53,7 +53,7 @@ class WebhookMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $requestedPath = $request->getUri()->getPath();
-        if (strpos($requestedPath, $this->webhookPathPrefix) !== 0) {
+        if (!str_starts_with($requestedPath, $this->webhookPathPrefix)) {
             return $handler->handle($request);
         }
 
@@ -62,7 +62,7 @@ class WebhookMiddleware implements MiddlewareInterface
             if (!$this->validatePayload($payload)) {
                 return $this->responseFactory->createResponse(400, 'Invalid payload submitted');
             }
-        } catch (\JsonException $e) {
+        } catch (\JsonException) {
             return $this->responseFactory->createResponse(400, 'Invalid payload submitted, parse error');
         }
 

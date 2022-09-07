@@ -28,7 +28,6 @@ class CantoController extends AbstractModuleController
     protected $assetSourceService;
 
     /**
-     * @return void
      * @throws
      */
     public function indexAction(): void

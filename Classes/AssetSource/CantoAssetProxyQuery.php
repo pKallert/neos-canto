@@ -32,11 +32,6 @@ use Psr\Log\LoggerInterface as SystemLoggerInterface;
 final class CantoAssetProxyQuery implements AssetProxyQueryInterface
 {
     /**
-     * @var CantoAssetSource
-     */
-    private $assetSource;
-
-    /**
      * @var string
      */
     private $searchTerm = '';
@@ -91,70 +86,45 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     /**
      * @param CantoAssetSource $assetSource
      */
-    public function __construct(CantoAssetSource $assetSource)
+    public function __construct(private CantoAssetSource $assetSource)
     {
-        $this->assetSource = $assetSource;
     }
 
-    /**
-     * @param int $offset
-     */
     public function setOffset(int $offset): void
     {
         $this->offset = $offset;
     }
 
-    /**
-     * @return int
-     */
     public function getOffset(): int
     {
         return $this->offset;
     }
 
-    /**
-     * @param int $limit
-     */
     public function setLimit(int $limit): void
     {
         $this->limit = $limit;
     }
 
-    /**
-     * @return int
-     */
     public function getLimit(): int
     {
         return $this->limit;
     }
 
-    /**
-     * @param string $searchTerm
-     */
     public function setSearchTerm(string $searchTerm): void
     {
         $this->searchTerm = $searchTerm;
     }
 
-    /**
-     * @return string
-     */
     public function getSearchTerm(): string
     {
         return $this->searchTerm;
     }
 
-    /**
-     * @param Tag $tag
-     */
     public function setActiveTag(Tag $tag): void
     {
         $this->activeTag = $tag;
     }
 
-    /**
-     * @return Tag
-     */
     public function getActiveTag(): Tag
     {
         return $this->activeTag;
@@ -168,56 +138,37 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
         $this->activeAssetCollection = $assetCollection;
     }
 
-    /**
-     * @return AssetCollection|null
-     */
     public function getActiveAssetCollection(): ?AssetCollection
     {
         return $this->activeAssetCollection;
     }
 
-    /**
-     * @param string $assetTypeFilter
-     */
     public function setAssetTypeFilter(string $assetTypeFilter): void
     {
         $this->assetTypeFilter = $assetTypeFilter;
     }
 
-    /**
-     * @return string
-     */
     public function getAssetTypeFilter(): string
     {
         return $this->assetTypeFilter;
     }
 
-    /**
-     * @return array
-     */
     public function getOrderings(): array
     {
         return $this->orderings;
     }
 
-    /**
-     * @param array $orderings
-     */
     public function setOrderings(array $orderings): void
     {
         $this->orderings = $orderings;
     }
 
-    /**
-     * @return AssetProxyQueryResultInterface
-     */
     public function execute(): AssetProxyQueryResultInterface
     {
         return new CantoAssetProxyQueryResult($this);
     }
 
     /**
-     * @return int
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException
@@ -225,7 +176,8 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     public function count(): int
     {
         $response = $this->sendSearchRequest(1, []);
-        $responseObject = \GuzzleHttp\json_decode($response->getBody());
+        $responseContent = $response->getBody()->getContents();
+        $responseObject = json_decode($responseContent, false, 512, JSON_THROW_ON_ERROR);
         return $responseObject->found ?? 0;
     }
 
@@ -241,13 +193,14 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     {
         $assetProxies = [];
         $response = $this->sendSearchRequest($this->limit, $this->orderings);
-        $responseObject = \GuzzleHttp\json_decode($response->getBody());
+        $responseContent = $response->getBody()->getContents();
+        $responseObject = json_decode($responseContent, false, 512, JSON_THROW_ON_ERROR);
 
         if (isset($responseObject->results) && is_array($responseObject->results)) {
             foreach ($responseObject->results as $rawAsset) {
                 $assetIdentifier = $rawAsset->scheme . '-' . $rawAsset->id;
 
-                $this->assetSource->getAssetProxyCache()->set($assetIdentifier, \GuzzleHttp\json_encode($rawAsset, JSON_FORCE_OBJECT));
+                $this->assetSource->getAssetProxyCache()->set($assetIdentifier, json_encode($rawAsset, JSON_THROW_ON_ERROR | JSON_FORCE_OBJECT));
 
                 $assetProxies[] = CantoAssetProxy::fromJsonObject($rawAsset, $this->assetSource);
             }
@@ -256,9 +209,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @param int $limit
-     * @param array $orderings
-     * @return Response
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException
@@ -293,7 +243,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @return void
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException
@@ -327,7 +276,6 @@ final class CantoAssetProxyQuery implements AssetProxyQueryInterface
     }
 
     /**
-     * @return void
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException

@@ -109,9 +109,6 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
     protected $thumbnailService;
 
     /**
-     * @param stdClass $jsonObject
-     * @param CantoAssetSource $assetSource
-     * @return static
      * @throws Exception
      */
     public static function fromJsonObject(stdClass $jsonObject, CantoAssetSource $assetSource): CantoAssetProxy
@@ -140,99 +137,61 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         return $assetProxy;
     }
 
-    /**
-     * @return AssetSourceInterface
-     */
     public function getAssetSource(): AssetSourceInterface
     {
         return $this->assetSource;
     }
 
-    /**
-     * @return string
-     */
     public function getIdentifier(): string
     {
         return $this->identifier;
     }
 
-    /**
-     * @return string
-     */
     public function getLabel(): string
     {
         return $this->label;
     }
 
-    /**
-     * @return string
-     */
     public function getFilename(): string
     {
         return $this->filename;
     }
 
-    /**
-     * @return \DateTime
-     */
     public function getLastModified(): \DateTime
     {
         return $this->lastModified;
     }
 
-    /**
-     * @return int
-     */
     public function getFileSize(): int
     {
         return $this->fileSize;
     }
 
-    /**
-     * @return string
-     */
     public function getMediaType(): string
     {
         return $this->mediaType;
     }
 
-    /**
-     * @param string $propertyName
-     * @return bool
-     */
     public function hasIptcProperty(string $propertyName): bool
     {
         return isset($this->iptcProperties[$propertyName]);
     }
 
-    /**
-     * @param string $propertyName
-     * @return string
-     */
     public function getIptcProperty(string $propertyName): string
     {
         return $this->iptcProperties[$propertyName] ?? '';
     }
 
-    /**
-     * @return array
-     */
     public function getIptcProperties(): array
     {
         return $this->iptcProperties;
     }
 
-    /**
-     * @return int|null
-     */
     public function getWidthInPixels(): ?int
     {
         return $this->widthInPixels;
     }
 
-    /**
-     * @return int|null
-     */
     public function getHeightInPixels(): ?int
     {
         return $this->heightInPixels;
@@ -286,17 +245,11 @@ final class CantoAssetProxy implements AssetProxyInterface, HasRemoteOriginalInt
         return ($importedAsset instanceof ImportedAsset ? $importedAsset->getLocalAssetIdentifier() : null);
     }
 
-    /**
-     * @return array
-     */
     public function getTags(): array
     {
         return $this->tags;
     }
 
-    /**
-     * @return bool
-     */
     public function isImported(): bool
     {
         $importedAsset = $this->importedAssetRepository->findOneByAssetSourceIdentifierAndRemoteAssetIdentifier($this->assetSource->getIdentifier(), $this->identifier);

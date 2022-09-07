@@ -28,11 +28,6 @@ use Neos\Media\Domain\Model\AssetSource\AssetProxyQueryResultInterface;
 class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
 {
     /**
-     * @var CantoAssetProxyQuery
-     */
-    private $query;
-
-    /**
      * @var array
      */
     private $assetProxies;
@@ -50,13 +45,11 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
     /**
      * @param CantoAssetProxyQuery $query
      */
-    public function __construct(CantoAssetProxyQuery $query)
+    public function __construct(private CantoAssetProxyQuery $query)
     {
-        $this->query = $query;
     }
 
     /**
-     * @return void
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws CacheException
@@ -71,16 +64,12 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
         }
     }
 
-    /**
-     * @return AssetProxyQueryInterface
-     */
     public function getQuery(): AssetProxyQueryInterface
     {
         return clone $this->query;
     }
 
     /**
-     * @return AssetProxyInterface|null
      * @throws CacheException
      * @throws GuzzleException
      * @throws InvalidDataException
@@ -160,7 +149,6 @@ class CantoAssetProxyQueryResult implements AssetProxyQueryResultInterface
     }
 
     /**
-     * @return int
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException

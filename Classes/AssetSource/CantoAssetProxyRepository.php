@@ -17,6 +17,7 @@ use Flownative\Canto\Exception\AssetNotFoundException;
 use Flownative\Canto\Exception\AuthenticationFailedException;
 use Flownative\OAuth2\Client\OAuthClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Utils;
 use Neos\Cache\Exception as CacheException;
 use Neos\Cache\Exception\InvalidDataException;
 use Neos\Media\Domain\Model\AssetCollection;
@@ -28,17 +29,13 @@ use Neos\Media\Domain\Model\AssetSource\SupportsCollectionsInterface;
 use Neos\Media\Domain\Model\AssetSource\SupportsSortingInterface;
 use Neos\Media\Domain\Model\AssetSource\SupportsTaggingInterface;
 use Neos\Media\Domain\Model\Tag;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * CantoAssetProxyRepository
  */
 class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, SupportsSortingInterface, SupportsTaggingInterface, SupportsCollectionsInterface
 {
-    /**
-     * @var CantoAssetSource
-     */
-    private $assetSource;
-
     /**
      * @var AssetCollection
      */
@@ -47,9 +44,8 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     /**
      * @param CantoAssetSource $assetSource
      */
-    public function __construct(CantoAssetSource $assetSource)
+    public function __construct(private CantoAssetSource $assetSource)
     {
-        $this->assetSource = $assetSource;
     }
 
     /**
@@ -63,8 +59,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     private $orderings = [];
 
     /**
-     * @param string $identifier
-     * @return AssetProxyInterface
      * @throws AssetNotFoundException
      * @throws OAuthClientException
      * @throws GuzzleException
@@ -77,17 +71,21 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     {
         $cacheEntry = $this->assetSource->getAssetProxyCache()->get($identifier);
         if ($cacheEntry) {
-            $responseObject = \GuzzleHttp\json_decode($cacheEntry);
+            $responseObject = Utils::jsonDecode($cacheEntry);
         } else {
             $response = $this->assetSource->getCantoClient()->getFile($identifier);
-            $responseObject = \GuzzleHttp\json_decode($response->getBody());
+            $responseContent = $response->getBody()->getContents();
+            if ($responseContent instanceof StreamInterface) {
+                $responseContent = $responseContent->getContents();
+            }
+            $responseObject = Utils::jsonDecode($responseContent);
         }
 
         if (!$responseObject instanceof \stdClass) {
             throw new AssetNotFoundException('Asset not found', 1526636260);
         }
 
-        $this->assetSource->getAssetProxyCache()->set($identifier, \GuzzleHttp\json_encode($responseObject, JSON_FORCE_OBJECT));
+        $this->assetSource->getAssetProxyCache()->set($identifier, Utils::jsonEncode($responseObject, JSON_FORCE_OBJECT));
 
         return CantoAssetProxy::fromJsonObject($responseObject, $this->assetSource);
     }
@@ -100,9 +98,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         $this->assetTypeFilter = (string)$assetType ?: 'All';
     }
 
-    /**
-     * @return AssetProxyQueryResultInterface
-     */
     public function findAll(): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
@@ -111,10 +106,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         return new CantoAssetProxyQueryResult($query);
     }
 
-    /**
-     * @param string $searchTerm
-     * @return AssetProxyQueryResultInterface
-     */
     public function findBySearchTerm(string $searchTerm): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
@@ -124,10 +115,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
         return new CantoAssetProxyQueryResult($query);
     }
 
-    /**
-     * @param Tag $tag
-     * @return AssetProxyQueryResultInterface
-     */
     public function findByTag(Tag $tag): AssetProxyQueryResultInterface
     {
         $query = new CantoAssetProxyQuery($this->assetSource);
@@ -139,7 +126,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @return AssetProxyQueryResultInterface
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException
@@ -155,7 +141,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @return int
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException
@@ -174,7 +159,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
      * )
      *
      * @param array $orderings The property names to order by by default
-     * @return void
      * @api
      */
     public function orderBy(array $orderings): void
@@ -183,7 +167,6 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
-     * @return int
      * @throws OAuthClientException
      * @throws GuzzleException
      * @throws AuthenticationFailedException
@@ -199,8 +182,20 @@ class CantoAssetProxyRepository implements AssetProxyRepositoryInterface, Suppor
     }
 
     /**
+     * @param Tag $tag
+     * @return int
+     */
+    public function countByTag(Tag $tag): int
+    {
+        try {
+            return ($this->findByTag($tag))->count();
+        } catch (AuthenticationFailedException|OAuthClientException|GuzzleException $e) {
+            return 0;
+        }
+    }
+
+    /**
      * @param AssetCollection|null $assetCollection
-     * @return void
      */
     public function filterByCollection(AssetCollection $assetCollection = null): void
     {
